@@ -1,0 +1,59 @@
+MWR Project : 
+======================
+Responsibilities : 
+1) Working as SD Lead. Leading Team of 4 Engineers. 
+2) Working closely with SIT  and Verifictation team to fix Mainline degrade issues.
+3) Debuggin Critical Customer Issues. 
+4) Working closely with Power driver team to Fix Power related issues. 
+5) Priority to SHOWSTOPPER and HIGH Tickets bug tracking system (Jira. 
+
+
+
+
+Project worked on in IMC. 
+===============================
+1) Sofia 3GR Platform   ASUS SoFIA 3G-R    Asus SoFIA 3GR 
+
+Android Compatibility Test Suite and Google Mobile Services Test Suite (GTS) Test Setup and 
+Resolvig issue relted to CTS GTS on Intel SF 3GR Platform
+
+2) Sofia LTE Platform 
+3) SoFIA LTE Mobil_WiFi_Router
+4) XMM6321 Platform.   
+
+
+Debugging Skills : 
+============================================================
+Have sound Android and kernel debugging Skills 
+1) T32 MIPI trace analysis. 
+2) T32 ETM Traces capture and anaysis. 
+.1 Profiling over ETM (ARM and INTEL based systems ) 
+
+=======================================
+•	Quality Experience in various technical roles as Software Engineer and Technical Leader.
+•	Involved in cooperating & communicating with other team members for efficient management work.
+•	Identified documents related to components as well as maintained detailed study of same as per the product changes, 
+	thereby got in touch with the product developers.
+
+•	Interacting with diffrent teams in IMC and providing training then with LB-Debugging.
+•	Analysed Kernel defect logs and resolve defects if related to BSP.
+•	Reproduced the issues and collect logs for analysis.
+•	Involved in learing and KT of different IMC tools like crash inspect STT calibration tools. 
+•	Very Good Experience in Hardware and Software debugging.
+•	Fixing and analysing Ramdump issues.
+•	Debugging of WLAN driver, framework and protocol issues
+•	Debugging issues from diffrent modules like Modem, Linux and Androind and its subcomponents. 
+
+Tools Used :: Android 4.3(JellyBean), Linux- 3.4, ADB Tool, ARM Toolchain, C, Perforce, Odin. 
+•	Operating System:	Linux, Android.
+•	Tools:			Lauterbach Trace32 JTAG debugger, ADB tools
+		Perforce and GIT for source code management.
+•	Familiar with the issues associated with Android devices.
+•	Trace-32 live and simulator debugging for kernel/Android and stability issue.
+
+
+•	Kernel and system stability issues:
+?	Analyzed and resolved many different kernel & system stability issues like data abort, prefect abort, watch dog bark and bite.
+?	Provided software work-around for different hardware limitation issues in application processor.
+?	Extensive use of Trace-32 tool for debugging kernel & system issues.
+?	Played a key role in improving overall system stability of galaxy s3 and many of its variants.
