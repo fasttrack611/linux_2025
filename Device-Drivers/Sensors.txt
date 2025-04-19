@@ -1,0 +1,1093 @@
+
+https://www.youtube.com/watch?v=BZ_ILlDBCJs ( Serial Peripheral Interface (SPI) Explained in Hindi l ERTOS Course ) 
+https://www.youtube.com/watch?v=4d2CalWTnK0 ( Inter-Integrated Circuit (I2C) Part-2 Explained in Hindi l Embedded and Real time Operating System ) 
+
+
+========================================================================================
+<6>0[    3.320098]      1 [K3DH] registering sensor-level input device
+<6>0[    3.326599]      1 input: accelerometer_sensor as	  /devices/virtual/input/input0
+<6>0[    3.401916]      1 input: proximity_sensor as	 	  /devices/virtual/input/input1
+<6>0[    3.508972]      1 input: magnetic_sensor as	  	 /devices/platform/alps/input/input2
+====================================================================================================
+
+http://www.youtube.com/watch?v=4Emjf341bLs
+
+
+static ssize_t acc_data_read(struct device *dev, struct device_attribute *attr, char *buf){
+        read_accel_raw_xyz_cal(&x, &y, &z);----->
+
+		---->	result = mpu6050_i2c_read_reg(gb_mpu_data->client, MPUREG_ACCEL_XOUT_H, 6, regs);
+
+        pr_debug("%s : x = %d, y = %d, z = %d\n", __func__, x, y, z);
+        return sprintf(buf, "%d, %d, %d\n", x, y, z);
+}
+
+static void mpu6050_work_func_acc(struct work_struct *work){
+	mpu6050_input_report_accel_xyz(data) ----> 
+
+------->  result =  mpu6050_i2c_read_reg(data->client, MPUREG_ACCEL_XOUT_H, 6, regs);
+------->  input_report_rel(data->input, REL_X, orien_raw[0] - data->acc_cal[0]);
+------->        input_report_rel(data->input, REL_Y, orien_raw[1] - data->acc_cal[1]);
+------->        input_report_rel(data->input, REL_Z, orien_raw[2] - data->acc_cal[2]);
+------->        input_sync(data->input);
+}
+
+
+
+
+static int __devinit mpu6050_input_probe(struct i2c_client *client, const struct i2c_device_id *id){
+
+ i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
+ 
+ data = kzalloc(sizeof(struct mpu6050_input_data), GFP_KERNEL);
+
+ error = sensors_register(data->accel_sensor_device,NULL, accel_sensor_attrs,"accelerometer_sensor");
+ error = sensors_register(data->gyro_sensor_device, NULL, gyro_sensor_attrs,"gyro_sensor");
+
+ error = mpu6050_input_register_input_device(data);----> 
+
+	----> 	input_set_capability(idev, EV_REL, REL_X);
+	---->   input_set_capability(idev, EV_REL, REL_Y);
+	---->   input_set_capability(idev, EV_REL, REL_Z);
+	---->   input_set_capability(idev, EV_REL, REL_RX);
+   	---->   input_set_capability(idev, EV_REL, REL_RY);
+ 	---->   input_set_capability(idev, EV_REL, REL_RZ);
+
+	---->   input_set_drvdata(idev, data);
+	---->   error = input_register_device(idev);
+	----> 	error = sysfs_create_group(&idev->dev.kobj, &mpu6050_attribute_group);
+	----> 	INIT_DELAYED_WORK(&data->accel_off_work, accel_turn_off_work);
+
+error = request_threaded_irq(client->irq, NULL, mpu6050_input_irq_thread,IRQF_TRIGGER_RISING | IRQF_ONESHOT, MPU6050_INPUT_DRIVER, data);
+
+	if (error < 0) {
+                        dev_err(&client->dev,"irq request failed %d, error %d\n",client->irq, error);
+                        input_unregister_device(data->input);
+                        goto err_input_initialize;
+         }
+
+ 	i2c_set_clientdata(client, data);
+
+}  /* END OF PROBE */
+
+
+
+static int mpu6050_input_suspend(struct device *dev){
+	----->     data = i2c_get_clientdata(client);
+	-----> 	   cancel_delayed_work_sync(&data->accel_work);
+	----->     disable_irq_wake(client->irq);
+	----->     disable_irq(client->irq);
+}
+ 
+
+static int mpu6050_input_resume(struct device *dev){
+	---->   data = i2c_get_clientdata(client);
+	---->   enable_irq(client->irq);
+	---->   enable_irq_wake(client->irq);
+	----> 	atomic_read(&data->gyro_enable))
+	---->   mpu6050_input_set_mode(data, MPU6050_MODE_NORMAL);
+}
+
+
+static const struct i2c_device_id mpu6050_input_id[] = {
+        {"mpu6050_input", 0},
+        {}
+};
+
+MODULE_DEVICE_TABLE(i2c, mpu6050_input_id);
+
+static const struct dev_pm_ops mpu6050_dev_pm_ops = {
+        .suspend = mpu6050_input_suspend,
+        .resume = mpu6050_input_resume,
+};
+
+static struct i2c_driver mpu6050_input_driver = {
+        .driver = {
+                .owner = THIS_MODULE,
+                .name = MPU6050_INPUT_DRIVER,
+                .pm = &mpu6050_dev_pm_ops,
+        },
+        .class = I2C_CLASS_HWMON,
+        .id_table = mpu6050_input_id,
+        .probe = mpu6050_input_probe,
+        .remove = mpu6050_input_remove,
+        .shutdown = mpu6050_input_shutdown,
+};
+
+
+static int __init mpu6050_init(void){
+        int result = i2c_add_driver(&mpu6050_input_driver);
+}
+
+
+static void __exit mpu6050_exit(void){
+        i2c_del_driver(&mpu6050_input_driver);
+}
+
+/*--------------------------------------------------------------------------------------*/ 
+	Sensor Driver Analysis "k3dh accelerometer driver.  
+	STMicroelectronics k3dh acceleration sensor driver
+/*--------------------------------------------------------------------------------------*/
+
+#define ACC_DEV_NAME "accelerometer"
+#define ACC_DEV_MAJOR 241
+#define K3DH_RETRY_COUNT        3
+
+static int k3dh_acc_i2c_read(char *buf, int len){
+
+i2c_transfer(k3dh_client->adapter, msgs, 2)
+
+}
+
+
+
+static int k3dh_acc_i2c_write(char *buf, int len){
+ struct i2c_msg msg[] = {
+                {
+                        .addr   = k3dh_client->addr,
+                        .flags  = 0,
+                        .len    = len,
+                        .buf    = buf,
+                }
+        };
+
+	i2c_transfer(k3dh_client->adapter, msg, 1);
+}
+
+
+/* Probe Functionalty */ 
+static int k3dh_probe(struct i2c_client *client, const struct i2c_device_id *id){
+
+	i2c_check_functionality(client->adapter, I2C_FUNC_I2C)
+	k3dh = kzalloc(sizeof(struct k3dh_data), GFP_KERNEL);
+
+	platform_data = client->dev.platform_data;	
+
+	 tempvalue = WHO_AM_I;
+	 err = i2c_master_send(client, (char*)&tempvalue, 1); /* read chip id */
+	 err = i2c_master_recv(client, (char*)&tempvalue, 1);
+	 
+	k3dh_client = client;
+        k3dh->client = k3dh_client;
+        i2c_set_clientdata(client, k3dh);
+
+        /* sensor HAL expects to find /dev/accelerometer */
+        k3dh->k3dh_device.minor = MISC_DYNAMIC_MINOR;
+        k3dh->k3dh_device.name = "k3dh";
+        k3dh->k3dh_device.fops = &k3dh_fops;
+
+
+	/* allocate lightsensor-level input_device */
+        input_dev = input_allocate_device();
+
+	input_set_drvdata(input_dev, g_k3dh);
+        input_dev->name = "accelerometer_sensor";
+
+	 /* acceleration x-axis */
+        input_set_capability(input_dev, EV_REL, REL_X);
+        input_set_abs_params(input_dev, REL_X, -256, 256, 0, 0);
+        /* acceleration y-axis */
+        input_set_capability(input_dev, EV_REL, REL_Y);
+        input_set_abs_params(input_dev, REL_Y, -256, 256, 0, 0);
+        /* acceleration z-axis */
+        input_set_capability(input_dev, EV_REL, REL_Z);
+        input_set_abs_params(input_dev, REL_Z, -256, 256, 0, 0);
+
+	err = input_register_device(input_dev);	
+	err = sysfs_create_group(&input_dev->dev.kobj,&acc_attribute_group);
+
+	/* Write All the default settings for accelerometer sensor */
+	INT1_THS (32h) . . 
+	INT1_DURATION (33h)
+	CLICK_CFG (38h) . .
+	CLICK_SRC (39h) . .
+	CLICK_THS (3Ah) . .
+ 
+
+	/* e.x  */ 
+	acc_data[0] = INT1_DURATION;
+        acc_data[1] = MOVEMENT_DURATION;
+        if(k3dh_acc_i2c_write(acc_data, 2) !=0)
+	/*Initialisation of GPIO_PS_OUT of proximity sensor*/
+	gpio_request(g_k3dh->irq_gpio, "ACC INT")
+
+	err = request_threaded_irq(g_k3dh->irq, NULL, k3dh_accel_interrupt_thread,IRQF_TRIGGER_RISING | IRQF_ONESHOT | IRQF_NO_SUSPEND, "ACC_INT", g_k3dh);
+
+}
+/* END of Probe Functionalty */ 
+
+
+static const struct dev_pm_ops k3dh_pm_ops = {
+        .suspend = k3dh_suspend,
+        .resume = k3dh_resume,
+};
+
+
+static struct i2c_driver k3dh_driver = {
+        .driver = {
+                .owner = THIS_MODULE,
+                .name = "k3dh",
+        },
+        .id_table = k3dh_id,
+        .probe = k3dh_probe,
+        .shutdown = k3dh_shutdown,
+        .remove = k3dh_remove,
+};
+
+
+static int __init k3dh_init(void){
+
+	/* regulator init */
+        /* regulator init */
+        sensor3v0_regulator = regulator_get(NULL, "sensor_3v");
+        if (IS_ERR(sensor3v0_regulator)){
+            printk(KERN_ERR "[K3DH] can not get prox_regulator (SENSOR_3.0V) \n");
+        } else {
+            ret = regulator_set_voltage(sensor3v0_regulator,3000000,3000000);
+            printk(KERN_INFO "[K3DH] regulator_set_voltage : %d\n", ret);
+            ret = regulator_enable(sensor3v0_regulator);
+            printk(KERN_INFO "[K3DH] regulator_enable : %d\n", ret);
+            regulator_put(sensor3v0_regulator);
+        }
+
+	dev_t = device_create( sensors_class, NULL, 0, NULL, "accelerometer_sensor");
+	device_create_file(dev_t, &dev_attr_calibration)
+	return i2c_add_driver(&k3dh_driver);
+}
+
+
+
+===========================================================================================================================================
+
+/*------------------------------------------------------------------------------------*/ 
+	/*   GP2AP030A00F is ambient light sensor and proximity sensor */ 
+
+
+GP2A_CHIP_ID	GP2AP030A00F 
+"include/linux/gp2ap030.h"
+"drivers/misc/gp2ap030.c"
+
+
+/*------------------------------------------------------------------------------------*/ 
+	/*	Optical Sensor driver for GP2AP030A00F */ 
+/*------------------------------------------------------------------------------------*/ 
+
+
+static irqreturn_t gp2a_irq_handler(int irq, void *dev_id){
+	wake_lock_timeout(&gp2a->prx_wake_lock, 3 * HZ);
+
+        schedule_work(&gp2a->proximity_work);
+ 	return IRQ_HANDLED;
+}
+
+
+static void gp2a_work_func_light(struct work_struct *work){
+
+ 	adc = lightsensor_get_adc(data);
+        input_report_rel(data->light_input_dev, REL_MISC, adc + 1);
+        input_sync(data->light_input_dev);
+	schedule_delayed_work(&data->light_work,msecs_to_jiffies(data->light_delay));
+}
+
+ 
+
+
+static struct file_operations gp2a_opt_fops = {
+        .owner          = THIS_MODULE,
+        .open           = gp2a_opt_open,
+        .release        = gp2a_opt_release,
+        .unlocked_ioctl         = gp2a_opt_ioctl,
+};
+
+static int gp2a_i2c_probe(struct i2c_client *client,const struct i2c_device_id *id){
+ 
+ struct gp2ap030_pdata *pdata = client->dev.platform_data;
+
+	/* allocate driver_data */
+        gp2a = kzalloc(sizeof(struct gp2a_data), GFP_KERNEL);
+
+	 i2c_set_clientdata(client, gp2a);
+        INIT_DELAYED_WORK(&gp2a->light_work, gp2a_work_func_light);
+        INIT_WORK(&gp2a->proximity_work, gp2a_work_func_prox);
+
+ 	/*misc device registration*/
+        err = misc_register(&gp2a_opt_misc_device);
+
+
+	err = proximity_input_init(gp2a); ------> 
+
+-------->   dev = input_allocate_device();
+-------->  input_set_capability(dev, EV_ABS, ABS_DISTANCE);
+-------->  input_set_abs_params(dev, ABS_DISTANCE, 0, 1, 0, 0);
+-------->  input_set_drvdata(dev, data);
+-------->  err = input_register_device(dev);
+-------->  data->proximity_input_dev = dev;
+
+--------> 
+
+           err = light_input_init(gp2a);  ----> 
+-------->  dev = input_allocate_device();
+-------->  input_set_capability(dev, EV_REL, REL_MISC);
+-------->  input_set_drvdata(dev, data);
+-------->  err = input_register_device(dev);
+
+
+	err = sysfs_create_group(&gp2a->proximity_input_dev->dev.kobj,&proximity_attribute_group);
+
+	/* Setup irq */
+        err = gp2a_setup_irq(gp2a);  ----> 
+
+--------> rc = gpio_request(pdata->p_out, "gpio_proximity_out");
+--------> rc = gpio_direction_input(pdata->p_out);
+--------> irq = gpio_to_irq(pdata->p_out);
+--------> rc = request_threaded_irq(irq, NULL, gp2a_irq_handler, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_NO_SUSPEND, "Proximity_int", gp2a);
+
+
+
+
+	err = sensors_register(gp2a->light_sensor_device, gp2a, additional_light_attrs, "light_sensor");
+
+	err = sensors_register(gp2a->proximity_sensor_device,gp2a, additional_proximity_attrs, "proximity_sensor");
+
+	/* set initial proximity value as 1 */
+        input_report_abs(gp2a->proximity_input_dev, ABS_DISTANCE, 1);
+        input_sync(gp2a->proximity_input_dev);
+
+
+
+}
+
+static int gp2a_i2c_suspend(struct device *dev){
+
+	struct gp2a_data *gp2a = i2c_get_clientdata(client);
+	
+	 if (gp2a->light_enabled)
+              cancel_delayed_work_sync(&gp2a->light_work);
+}
+
+
+static int gp2a_i2c_resume(struct device *dev){
+
+	struct gp2a_data *gp2a = i2c_get_clientdata(client);
+	if (gp2a->light_enabled)
+                schedule_delayed_work(&gp2a->light_work, 0);
+}
+
+
+
+
+static const struct dev_pm_ops gp2a_dev_pm_ops = {
+        .suspend = gp2a_i2c_suspend,
+        .resume = gp2a_i2c_resume,
+};
+
+
+static struct i2c_driver gp2a_i2c_driver = {
+        .driver = {
+                        .name = "gp2a030",
+                        .owner = THIS_MODULE,
+                        .pm = &gp2a_dev_pm_ops,
+        },
+        .probe = gp2a_i2c_probe,
+        .remove = gp2a_i2c_remove,
+        .shutdown = gp2a_i2c_shutdown,
+        .id_table = gp2a_device_id,
+};
+
+
+static int gp2a_i2c_init(void)
+{
+
+	i2c_add_driver(&gp2a_i2c_driver);
+}
+
+------------------------------------------------------------------------------------
+
+
+
+------------------------------------------------------------------------------------
+<1>1[  768.491882]   2646 sh_csi2_s_stream stream on
+
+<1>0[  768.591613]   2646 sh_csi2_s_stream stream off
+
+SR030PC50_power PowerON
+sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_try_fmt(8198)
+sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_s_fmt(8198)
+SR030PC50_power PowerOFF fin
+
+
+ sh_csi2_s_stream stream on
+ sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_try_fmt(8198)
+ sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_try_fmt(8198)
+ sh_mobile_rcu sh_mobile_rcu.1: in: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: in: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: out: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: out: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_s_fmt(8198)
+ sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_s_fmt(8198)
+ sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_try_fmt(8198)
+ sh_mobile_rcu sh_mobile_rcu.1: SR030PC50_try_fmt(8198)
+ sh_mobile_rcu sh_mobile_rcu.1: in: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: in: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: out: mf->width = 640, height = 480
+ sh_mobile_rcu sh_mobile_rcu.1: out: mf->width = 640, height = 480
+ sh_csi2_s_stream stream on
+ cmt: sh_cmt.12 used for oneshot clock events
+ cmt: sh_cmt.12 used for clock events
+ sh_csi2_s_stream stream off
+
+
+
+
+drivers/media/video/sr030pc50.c
+drivers/media/video/sh_mobile_csi2.c
+
+kernel $ grep -r "sensorname" *
+drivers/media/video/s5k4ecgx.c: char *sensorname = "S5K4ECGX";
+drivers/media/video/sr130pc20.c:        return sprintf(buf, "%s\n", sensorname);
+drivers/media/video/sr200pc20m.c:       char *sensorname = "SR200PC20M";
+drivers/media/video/sr352.c:    char *sensorname = "SR352";
+sensors:drivers/media/video/s5k4ecgx.c: return sprintf(buf, "%s\n", sensorname);
+sensors:drivers/media/video/sr030pc50.c:        char *sensorname = "SR030PC50";
+sensors:drivers/media/video/sr200pc20m.c:       char *sensorname = "SR200PC20M";
+sensors:drivers/media/video/sr352.c:    return sprintf(buf, "%s\n", sensorname);
+
+
+
+-------------------------------------------------------------------------------------------------------------------
+shakanth@balogin001 kernel $ grep -r "SR030PC50" *
+
+arch/arm/mach-shmobile/setup-u2camera.c	        : defined(CONFIG_SOC_CAMERA_SR030PC50) /* Select by board Rev */
+drivers/media/video/Kconfig			: config SOC_CAMERA_SR030PC50
+drivers/media/video/Makefile			: obj-$(CONFIG_SOC_CAMERA_SR030PC50)      += sr030pc50.o
+drivers/media/video/sr030pc50.c			: * Driver for Samsung SR030PC50 VGA Camera
+include/media/sr030pc50.h			: int SR030PC50_power(struct device *dev, int power_on);
+include/media/v4l2-chip-ident.h			: V4L2_IDENT_SR030PC50 = 100022,
+
+-------------------------------------------------------------------------------------------------------------------
+
+arch/arm/configs/u2_loganlte_rev000_defconfig
+CONFIG_SOC_CAMERA_SR030PC50=y
+CONFIG_SOC_CAMERA_SR030PC50_TUNING=n
+
+arch/arm/mach-shmobile/include/mach/setup-u2camera.h
+
+#if defined(CONFIG_SOC_CAMERA_SR030PC50)
+int SR030PC50_power(struct device *dev, int power_on);
+#endif
+
+-----------------------------------------------------------
+arch/arm/mach-shmobile/setup-u2camera.c
+
+  /* Front Camera */
+CONFIG_SOC_CAMERA_SR030PC50
+"arch/arm/mach-shmobile/setup-u2camera.c"
+
+
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX) && \
+        defined(CONFIG_SOC_CAMERA_SR030PC50) /* Select by board Rev */
+struct i2c_board_info i2c_cameras[] = {
+        {
+                I2C_BOARD_INFO("S5K4ECGX", 0x56),
+        },
+        {
+                I2C_BOARD_INFO("SR030PC50", 0x30), /* TODO::HYCHO (0x61>>1) */
+        },
+};
+
+
+struct soc_camera_link camera_links[] = {
+        /* Rear Camera */
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX)
+        {
+                .bus_id                 = 0,
+                .board_info             = &i2c_cameras[0],
+                .i2c_adapter_id = 1,
+                .module_name    = "S5K4ECGX",
+                .power                  = S5K4ECGX_power,
+        },
+#endif
+        /* Front Camera */
+#if defined(CONFIG_SOC_CAMERA_SR030PC50)
+        {
+                .bus_id                 = 1,
+                .board_info             = &i2c_cameras[1],
+                .i2c_adapter_id = 1,
+                .module_name    = "SR030PC50",
+                .power                  = SR030PC50_power,
+        },
+#endif
+};
+
+
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX) && \
+        defined(CONFIG_SOC_CAMERA_SR030PC50) /* Select by board Rev */
+        csi20_info.clients[0].lanes = 0x3;
+#else   /* Select by board Rev */
+
+
+
+
+
+int SR030PC50_power(struct device *dev, int power_on){
+
+  vclk1_clk = clk_get(NULL, "vclk1_clk");
+
+
+        if (power_on) {
+                printk(KERN_ALERT "%s PowerON\n", __func__);
+
+                sh_csi2_power(dev, power_on);
+                gpio_set_value(GPIO_PORT3, 0); /* CAM_PWR_EN */
+                gpio_set_value(GPIO_PORT16, 0); /* CAM1_RST_N */
+                gpio_set_value(GPIO_PORT91, 0); /* TODO::HYCHO CAM1_CEN */
+                gpio_set_value(GPIO_PORT20, 0); /* CAM0_RST_N */
+                gpio_set_value(GPIO_PORT45, 0); /* CAM0_STBY */
+
+	}
+
+#if defined(CONFIG_MFD_D2153)
+                regulator = regulator_get(NULL, "cam_sensor_a");
+                if (IS_ERR(regulator))
+                        return -1;
+                regulator_enable(regulator);
+                regulator_put(regulator);
+
+}
+------------------------------------------------------------------------------------
+
+"drivers/media/video/Kconfig"
+config SOC_CAMERA_SR030PC50
+        tristate "sr030pc50 support"
+        depends on SOC_CAMERA && I2C
+        help
+          This driver supports SR030PC50 cameras from siliconfile
+
+config SOC_CAMERA_SR030PC50_TUNING
+        tristate "sr030pc50 tuning support"
+        depends on SOC_CAMERA_SR030PC50 && I2C
+        help
+          This driver supports SR030PC50 tuning cameras from Samsung
+------------------------------------------------------------------------------------
+
+drivers/media/video/Makefile			:obj-$(CONFIG_SOC_CAMERA_SR030PC50)      += sr030pc50.o
+
+------------------------------------------------------------------------------------
+
+include/media/v4l2-chip-ident.h   /*  v4l2 chip identifiers header */ 
+
+
+enum {
+        /* general idents: reserved range 0-49 */
+ /* Siliconfile SR030PC50 */
+        V4L2_IDENT_SR030PC50 = 100022,
+        V4L2_IDENT_SR130PC20 = 100023,
+};
+
+--------------------------------------------------------------------------------------------------------
+
+/*	 Driver for the SH-Mobile MIPI CSI-2 unit 	*/ 
+/* 	drivers/media/video/sh_mobile_csi2.c           */ 
+/*	SH-Mobile MIPI CSI-2 driver 		      */ 
+
+
+
+
+------------------------------------------------------------------------------------------
+/* Driver for Samsung SR030PC50 VGA Camera  ( Samsung SR030PC50 Camera driver") )  */
+------------------------------------------------------------------------------------------
+
+
+  < drivers/media/video/sr030pc50.c > 
+
+
+static inline int sr030pc50_read(struct i2c_client *client, unsigned char subaddr, unsigned char *data){
+
+  struct i2c_msg msg = {client->addr, 0, 1, buf};
+  err = i2c_transfer(client->adapter, &msg, 1);
+
+}
+
+static inline int sr030pc50_write(struct i2c_client *client, unsigned short packet){
+
+        struct i2c_msg msg = {
+                .addr   = client->addr,
+                .flags  = 0,
+                .buf    = buf,
+                .len    = 2,
+        };
+
+ err = i2c_transfer(client->adapter, &msg, 1);
+
+}
+
+
+static int SR030PC50_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *id){
+	sr030pc50_write(client, 0x0300); /* Page 0 */
+        ret = sr030pc50_read(client, 0x04, rcv_buf);
+        /* device id = P0(0x00) address 0x04 = 0xB8 */
+
+}
+
+static struct v4l2_subdev_video_ops SR030PC50_subdev_video_ops = {
+        .s_mbus_fmt     = SR030PC50_s_fmt,
+        .g_mbus_fmt     = SR030PC50_g_fmt,
+        .try_mbus_fmt   = SR030PC50_try_fmt,
+        .enum_mbus_fmt  = SR030PC50_enum_fmt,
+        .g_crop         = SR030PC50_g_crop,
+        .cropcap        = SR030PC50_cropcap,
+        .g_mbus_config  = SR030PC50_g_mbus_config,
+        .s_mbus_config  = SR030PC50_s_mbus_config,
+};
+
+
+static int SR030PC50_probe(struct i2c_client *client, const struct i2c_device_id *did){
+
+  
+        struct soc_camera_link *icl = soc_camera_i2c_to_link(client);
+        priv = kzalloc(sizeof(*priv), GFP_KERNEL); 
+        v4l2_i2c_subdev_init(&priv->subdev, client, &SR030PC50_subdev_ops);
+
+        v4l2_ctrl_handler_init(&priv->hdl, 4);
+        v4l2_ctrl_new_std(&priv->hdl, &SR030PC50_ctrl_ops, V4L2_CID_VFLIP, 0, 1, 1, 0);
+        v4l2_ctrl_new_std(&priv->hdl, &SR030PC50_ctrl_ops, V4L2_CID_HFLIP, 0, 1, 1, 0);
+        v4l2_ctrl_new_std(&priv->hdl, &SR030PC50_ctrl_ops, V4L2_CID_GAIN, 0, 127, 1, 66);
+        v4l2_ctrl_new_std(&priv->hdl, &SR030PC50_ctrl_ops, V4L2_CID_AUTO_WHITE_BALANCE, 0, 1, 1, 1);
+
+ 	priv->width     = 640;
+        priv->height    = 480;
+        priv->fmt       = &SR030PC50_colour_fmts[0];
+        ret = v4l2_ctrl_handler_setup(&priv->hdl);
+	camera_class = class_create(THIS_MODULE, "camera");
+
+	sec_sub_cam_dev = device_create(camera_class,NULL, 0, NULL, "front");
+	device_create_file(sec_sub_cam_dev, &dev_attr_front_camtype);
+}
+
+static const struct i2c_device_id SR030PC50_id[] = {
+        { "SR030PC50", 0 },
+        { }
+};
+MODULE_DEVICE_TABLE(i2c, SR030PC50_id);
+
+static struct i2c_driver SR030PC50_i2c_driver = {
+        .driver = {
+                .name = "SR030PC50",
+        },
+        .probe          = SR030PC50_probe,
+        .remove         = SR030PC50_remove,
+        .id_table       = SR030PC50_id,
+};
+
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+/*  Thermal Sensor Driver  */ 
+	
+	drivers/thermal/thermal_sensor/ths_main.c 
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+
+/* ths_early_suspend_wq: work function executed during early suspend */
+
+
+static void ths_early_suspend_wq(struct work_struct *work){
+
+	/* Queue work for 2 seconds */
+	queue_delayed_work_on(0, ths_wait_wq, &ths_work, usecs_to_jiffies(2000*1000));
+
+
+}
+
+
+static int ths_early_suspend(struct early_suspend *h){
+
+queue_delayed_work_on(0, ths_wait_wq, &ths_work, usecs_to_jiffies(500*1000));
+
+
+}
+
+
+static int __devinit ths_probe(struct platform_device *pdev){
+
+
+	 /* Register miscdevice (initialize user interface) */
+        ret = misc_register(&ths_user);
+
+	 /* Get default Thermal Sensor driver data: operation mode */
+        ret = ths_initialize_platform_data(pdev); ------> 
+
+-------->  ths = kzalloc(sizeof(struct thermal_sensor), GFP_KERNEL); 
+-------->   platform_set_drvdata(pdev, ths);
+-------->   memcpy(ths->pdata, pdev->dev.platform_data, 2 * sizeof(struct thermal_sensor_data));
+
+
+	/* Get default driver resource: mapping memory */
+        ret = ths_initialize_resource(pdev);
+------->  rs = platform_get_resource(pdev, IORESOURCE_MEM, 0); 
+------->  ths->iomem_base = ioremap_nocache(rs->start, resource_size(rs)); 
+
+	/* Initialize mutex */
+        mutex_init(&ths->sensor_mutex);
+
+        /* Get irq and bind interrupt to isr */
+        ths->ths_irq = platform_get_irq(pdev, 0);
+
+	ret = request_irq(ths->ths_irq, ths_isr, 0, pdev->name, pdev);
+
+ /* Create a new queue for bottom-half processing */
+        ths->queue = create_singlethread_workqueue("ths_queue");
+
+
+    /* Activate Thermal Sensor module */
+        ret = ths_start_module(pdev); -----> 
+
+--------->  ths->clk = clk_get(&pdev->dev, clk_name);
+--------->   ret = clk_enable(ths->clk);
+
+      /* Initialize the operation of Thermal Sensor device */
+        ths_initialize_hardware();--------> 
+
+--------->  /* Disable chattering restraint function */
+--------->  set_register_32(STR_RW_32B, TJST_ALL_CLEAR); /* Clear Interrupt Status register */
+
+        /*
+         * Set operation mode for THS0/THS1: Normal 1 mode
+         * and TSC decides a value of CPTAP automatically
+         */
+--------> set_register_32(ENR_RW_32B, TJ13_EN | TJ03_EN | TJ02_EN | TJ01_EN | TJ00_EN); /*Enable all interrupts in THS0 and only INTDT3 in THS1 */
+--------> /* Enable temperature sensor reset request in SYSC */
+
+        schedule_delayed_work(&ths->work, msecs_to_jiffies(500));
+}
+
+
+static const struct dev_pm_ops ths_dev_pm_ops = {
+        .suspend = ths_suspend,
+        .resume  = ths_resume,
+};
+
+static struct platform_driver ths_driver = {
+        .probe  = ths_probe,
+        .remove = __devexit_p(ths_remove),
+        .driver = {
+                .name = "thermal_sensor",
+                .pm   = &ths_dev_pm_ops,
+        }
+};
+
+
+
+
+/*
+ * ths_init: Register Thermal sensor module (  @ths_driver: Thermal sensor platform driver ) */
+static int __init ths_init(void){
+        return platform_driver_register(&ths_driver);
+}
+
+
+/*
+ * ths_exit: Deregister Thermal sensor module ( *  @ths_driver: Thermal sensor platform driver )  */
+static void __exit ths_exit(void){
+        platform_driver_unregister(&ths_driver);
+}
+
+---------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------
+
+arch/arm/configs/debug_u2_loganlte_rev000_defconfig
+>>  CONFIG_SOC_CAMERA_S5K4ECGX=y
+>>  CONFIG_SOC_CAMERA_S5K4ECGX_TUNING=n
+-------------------------------------------------------------------------------------------------------
+
+arch/arm/mach-shmobile/include/mach/setup-u2camera.h:#if defined(CONFIG_SOC_CAMERA_S5K4ECGX)
+
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX)
+int S5K4ECGX_power(struct device *dev, int power_on);
+#endif
+
+-------------------------------------------------------------------------------------------------------
+
+arch/arm/mach-shmobile/setup-u2camera.c:#if defined(CONFIG_SOC_CAMERA_S5K4ECGX) 
+
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX)  
+
+struct i2c_board_info i2c_cameras[] = {
+        {
+                I2C_BOARD_INFO("S5K4ECGX", 0x56),
+        },
+        {
+                I2C_BOARD_INFO("SR030PC50", 0x30), /* TODO::HYCHO (0x61>>1) */
+        },
+};
+
+struct soc_camera_link camera_links[] = {
+        {
+                .bus_id                 = 0,
+                .board_info             = &i2c_cameras[0],
+                .i2c_adapter_id = 1,
+                .module_name    = "S5K4ECGX",
+                .power                  = S5K4ECGX_power,
+        },
+        {
+                .bus_id                 = 1,
+                .board_info             = &i2c_cameras[1],
+                .i2c_adapter_id = 1,
+                .module_name    = "SR030PC50",
+                .power                  = SR030PC50_power,
+        },
+};
+#else   /* Select by board Rev */
+
+
+        /* Rear Camera */
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX)
+        {
+                .bus_id                 = 0,
+                .board_info             = &i2c_cameras[0],
+                .i2c_adapter_id = 1,
+                .module_name    = "S5K4ECGX",
+                .power                  = S5K4ECGX_power,
+        },
+#endif
+
+
+
+int camera_init(void){
+	gpio_request(GPIO_PORT3, NULL);
+        gpio_direction_output(GPIO_PORT3, 0);   /* CAM_PWR_EN */
+        gpio_request(GPIO_PORT20, NULL);
+        gpio_direction_output(GPIO_PORT20, 0);  /* CAM0_RST_N */
+
+ vclk1_clk = clk_get(NULL, "vclk1_clk");
+ iRet = clk_set_parent(vclk1_clk, pll1_div2_clk);
+
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX) && \
+        defined(CONFIG_SOC_CAMERA_SR030PC50) /* Select by board Rev */
+        csi20_info.clients[0].lanes = 0x3;
+
+}
+
+
+
+
+
+#if defined(CONFIG_SOC_CAMERA_S5K4ECGX)
+int S5K4ECGX_power(struct device *dev, int power_on){
+	
+	 vclk1_clk = clk_get(NULL, "vclk1_clk");
+	 vclk2_clk = clk_get(NULL, "vclk2_clk");
+
+	 regulator = regulator_get(NULL, "cam_sensor_a");
+
+	 gpio_set_value(GPIO_PORT91, 1); /* CAM1_STBY */
+
+	iRet = clk_set_rate(vclk1_clk, clk_round_rate(vclk1_clk, 24000000));
+
+  	sh_csi2_power(dev, power_on);
+ 	clk_put(vclk1_clk);
+        clk_put(vclk2_clk);
+}
+  
+
+
+---------------------------------------------------------------------------------------------------------------------
+drivers/media/video/Kconfig
+
+
+config SOC_CAMERA_S5K4ECGX
+        tristate "s5k4ecgx support"
+        depends on SOC_CAMERA && I2C
+        help
+          This driver supports S5K4ECGX cameras from Samsung
+
+config SOC_CAMERA_S5K4ECGX_TUNING
+        tristate "s5k4ecgx tuning support"
+        depends on SOC_CAMERA_S5K4ECGX && I2C
+        help
+          This driver supports S5K4ECGX tuning cameras from Samsung
+
+---------------------------------------------------------------------------------------------------------------------
+
+drivers/media/video/Makefile:obj-$(CONFIG_SOC_CAMERA_S5K4ECGX)  += s5k4ecgx.o
+
+obj-$(CONFIG_SOC_CAMERA_S5K4ECGX)       += s5k4ecgx.o
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+	/*  	Driver for Samsung S5K4ECGX  Camera	 */ 
+	/*	drivers/media/video/s5k4ecgx.c   	*/ 
+
+static ssize_t subcamtype_S5K4ECGX_show(struct device *dev, struct device_attribute *attr, char *buf){
+        char *sensorname = "S5K4ECGX";
+        return sprintf(buf, "%s\n", sensorname);
+}
+
+static ssize_t subcamfw_S5K4ECGX_show(struct device *dev, struct device_attribute *attr, char *buf){
+        char *sensorfw = "S5K4ECGX N";
+        return sprintf(buf, "%s\n", sensorfw);
+}
+
+
+static DEVICE_ATTR(rear_camtype, 0644, subcamtype_S5K4ECGX_show, NULL);
+static DEVICE_ATTR(rear_camfw, 0644, subcamfw_S5K4ECGX_show, NULL);
+
+
+static struct S5K4ECGX *to_S5K4ECGX(const struct i2c_client *client){
+        return container_of(i2c_get_clientdata(client), struct S5K4ECGX, subdev);
+}
+
+
+
+static int S5K4ECGX_g_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *mf){
+ struct i2c_client *client = v4l2_get_subdevdata(sd);
+ mf->code        = fmt->code;
+        mf->colorspace  = fmt->colorspace;
+        mf->width       = priv->width;
+        mf->height      = priv->height;
+        mf->field       = V4L2_FIELD_NONE;
+
+}
+
+static int S5K4ECGX_cropcap(struct v4l2_subdev *sd, struct v4l2_cropcap *a){
+        struct i2c_client *client = v4l2_get_subdevdata(sd);
+        
+        a->bounds.left                  = 0;
+        a->bounds.top                   = 0;
+        a->bounds.width                 = priv->width;
+        a->bounds.height                = priv->height;
+	a->type                         = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        a->pixelaspect.numerator        = 1;
+
+}
+
+
+
+static int S5K4ECGX_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *id){
+        /* check i2c device */
+  
+	 /* check i2c device */
+        struct i2c_client *client = v4l2_get_subdevdata(sd);
+
+ msg[0].addr = client->addr;
+        msg[0].flags = client->flags & I2C_M_TEN;
+        msg[0].len = 2;
+        msg[0].buf = (char *) send_buf;
+        /* FW Sensor ID Support */
+        send_buf[0] = 0x01;
+        send_buf[1] = 0x5A;
+
+        msg[1].addr = client->addr;
+        msg[1].flags = client->flags & I2C_M_TEN;
+        msg[1].flags |= I2C_M_RD;
+        msg[1].len = 2;
+        msg[1].buf = rcv_buf;
+
+        for (loop = 0; loop < 5; loop++) {
+                ret = i2c_transfer(client->adapter, msg, 2);
+                if (0 <= ret)
+                        break;
+        }
+}
+
+
+
+
+static int S5K4ECGX_probe(struct i2c_client *client, const struct i2c_device_id *did){
+
+struct soc_camera_link *icl = soc_camera_i2c_to_link(client);
+
+
+	 priv = kzalloc(sizeof(*priv), GFP_KERNEL);
+	 v4l2_i2c_subdev_init(&priv->subdev, client, &S5K4ECGX_subdev_ops);
+         v4l2_ctrl_handler_init(&priv->hdl, 4);
+         v4l2_ctrl_new_std(&priv->hdl, &S5K4ECGX_ctrl_ops, V4L2_CID_VFLIP, 0, 1, 1, 0);
+         v4l2_ctrl_new_std(&priv->hdl, &S5K4ECGX_ctrl_ops, V4L2_CID_HFLIP, 0, 1, 1, 0);
+         v4l2_ctrl_new_std(&priv->hdl, &S5K4ECGX_ctrl_ops, V4L2_CID_GAIN, 0, 127, 1, 66);
+         v4l2_ctrl_new_std(&priv->hdl, &S5K4ECGX_ctrl_ops, V4L2_CID_AUTO_WHITE_BALANCE, 0, 1, 1, 1);
+         priv->subdev.ctrl_handler = &priv->hdl;
+  
+	priv->width     = 640;
+        priv->height    = 480;
+        priv->fmt       = &S5K4ECGX_colour_fmts[0];
+        ret = v4l2_ctrl_handler_setup(&priv->hdl);
+
+ 	camera_class = class_create(THIS_MODULE, "camera");
+
+	sec_main_cam_dev = device_create(camera_class, NULL, 0, NULL, "rear");
+
+ 	device_create_file(sec_main_cam_dev, &dev_attr_rear_camtype);
+	device_create_file(sec_main_cam_dev, &dev_attr_rear_camfw); 
+	device_create_file(sec_main_cam_dev, &dev_attr_rear_flash);
+	device_create_file(sec_main_cam_dev, &dev_attr_rear_vendorid);
+}
+
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,188 @@
+https://linux-kernel-labs.github.io/refs/heads/master/labs/block_device_drivers.html 
+================================================
+
+
+struct block_device_operations {
+	void (*submit_bio)(struct bio *bio);
+	int (*poll_bio)(struct bio *bio, struct io_comp_batch *iob,
+			unsigned int flags);
+	int (*open) (struct block_device *, fmode_t);
+	void (*release) (struct gendisk *, fmode_t);
+	int (*rw_page)(struct block_device *, sector_t, struct page *, enum req_op);
+	int (*ioctl) (struct block_device *, fmode_t, unsigned, unsigned long);
+	int (*compat_ioctl) (struct block_device *, fmode_t, unsigned, unsigned long);
+	unsigned int (*check_events) (struct gendisk *disk,
+				      unsigned int clearing);
+	void (*unlock_native_capacity) (struct gendisk *);
+	int (*getgeo)(struct block_device *, struct hd_geometry *);
+	int (*set_read_only)(struct block_device *bdev, bool ro);
+	void (*free_disk)(struct gendisk *disk);
+	/* this callback is with swap_lock and sometimes page table lock held */
+	void (*swap_slot_free_notify) (struct block_device *, unsigned long);
+	int (*report_zones)(struct gendisk *, sector_t sector,
+			unsigned int nr_zones, report_zones_cb cb, void *data);
+	char *(*devnode)(struct gendisk *disk, umode_t *mode);
+	/* returns the length of the identifier or a negative errno: */
+	int (*get_unique_id)(struct gendisk *disk, u8 id[16],
+			enum blk_unique_id id_type);
+	struct module *owner;
+	const struct pr_ops *pr_ops;
+
+	/*
+	 * Special callback for probing GPT entry at a given sector.
+	 * Needed by Android devices, used by GPT scanner and MMC blk
+	 * driver.
+	 */
+	int (*alternative_gpt_sector)(struct gendisk *disk, sector_t *sector);
+};
+
+==============
+static const struct block_device_operations zram_devops = {
+	.open = zram_open,
+	.submit_bio = zram_submit_bio,
+	.swap_slot_free_notify = zram_slot_free_notify,
+	.rw_page = zram_rw_page,
+	.owner = THIS_MODULE
+};
+
+
+static int zram_add(void)
+{
+	/* gendisk structure */
+	zram->disk = blk_alloc_disk(NUMA_NO_NODE);
+
+	zram->disk->major = zram_major;
+	zram->disk->first_minor = device_id;
+	zram->disk->minors = 1;
+	zram->disk->flags |= GENHD_FL_NO_PART;
+	zram->disk->fops = &zram_devops;
+	zram->disk->private_data = zram;
+	snprintf(zram->disk->disk_name, 16, "zram%d", device_id);
+
+
+	/* Actual capacity set using syfs (/sys/block/zram<id>/disksize */
+	set_capacity(zram->disk, 0);
+	/* zram devices sort of resembles non-rotational disks */
+	blk_queue_flag_set(QUEUE_FLAG_NONROT, zram->disk->queue);
+	blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, zram->disk->queue);
+
+	/*
+	 * To ensure that we always get PAGE_SIZE aligned
+	 * and n*PAGE_SIZED sized I/O requests.
+	 */
+	blk_queue_physical_block_size(zram->disk->queue, PAGE_SIZE);
+	blk_queue_logical_block_size(zram->disk->queue,
+					ZRAM_LOGICAL_BLOCK_SIZE);
+	blk_queue_io_min(zram->disk->queue, PAGE_SIZE);
+	blk_queue_io_opt(zram->disk->queue, PAGE_SIZE);
+
+
+	blk_queue_flag_set(QUEUE_FLAG_STABLE_WRITES, zram->disk->queue);
+	ret = device_add_disk(NULL, zram->disk, zram_disk_groups);
+	if (ret)
+		goto out_cleanup_disk;
+
+}
+
+static int __init zram_init(void)
+{
+
+	ret = class_register(&zram_control_class);
+	zram_major = register_blkdev(0, "zram");
+
+=====================================================
+
+
+
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/fs.h>
+#include <linux/blkdev.h>
+#include <linux/genhd.h>
+#include <linux/errno.h>
+#include <linux/types.h>
+
+#define MYBLOCKDEV_NAME "myblockdev"
+#define MYBLOCKDEV_MINORS 1
+#define MYBLOCKDEV_SIZE 1024
+
+static struct gendisk *myblockdev_disk;
+static struct request_queue *myblockdev_queue;
+static u8 *myblockdev_data;
+
+static int myblockdev_open(struct block_device *bdev, fmode_t mode)
+{
+    printk(KERN_INFO "myblockdev: Device opened\n");
+    return 0;
+}
+
+static void myblockdev_release(struct gendisk *disk, fmode_t mode)
+{
+    printk(KERN_INFO "myblockdev: Device closed\n");
+}
+
+static struct block_device_operations myblockdev_fops = {
+    .owner = THIS_MODULE,
+    .open = myblockdev_open,
+    .release = myblockdev_release,
+};
+
+static void myblockdev_request(struct request_queue *q)
+{
+    struct request *req;
+    while ((req = blk_fetch_request(q)) != NULL) {
+        if (req->cmd_type != REQ_TYPE_FS) {
+            printk(KERN_WARNING "myblockdev: Skipping non-fs request\n");
+            __blk_end_request_all(req, -EIO);
+            continue;
+        }
+        switch (req->cmd) {
+            case READ:
+            case WRITE:
+                break;
+            default:
+                printk(KERN_WARNING "myblockdev: Skipping unsupported request\n");
+                __blk_end_request_all(req, -EIO);
+                continue;
+        }
+        blk_start_request(req);
+        if (blk_rq_pos(req) + blk_rq_cur_sectors(req) > MYBLOCKDEV_SIZE) {
+            printk(KERN_WARNING "myblockdev: Request out of range\n");
+            __blk_end_request_all(req, -EIO);
+            continue;
+        }
+        if (req->cmd == READ) {
+            memcpy(req->buffer, myblockdev_data + blk_rq_pos(req), blk_rq_cur_bytes(req));
+        } else {
+            memcpy(myblockdev_data + blk_rq_pos(req), req->buffer, blk_rq_cur_bytes(req));
+        }
+        __blk_end_request_all(req, 0);
+    }
+}
+
+static int __init myblockdev_init(void)
+{
+    int ret = 0;
+    myblockdev_data = kzalloc(MYBLOCKDEV_SIZE, GFP_KERNEL);
+    if (myblockdev_data == NULL) {
+        printk(KERN_WARNING "myblockdev: Unable to allocate memory\n");
+        ret = -ENOMEM;
+        goto fail_kzalloc;
+    }
+    myblockdev_disk = alloc_disk(MYBLOCKDEV_MINORS);
+    if (myblockdev_disk == NULL) {
+        printk(KERN_WARNING "myblockdev: Unable to allocate disk\n");
+        ret = -ENOMEM;
+        goto fail_alloc_disk;
+    }
+    myblockdev_disk->major = 0;
+    myblockdev_disk->first_minor = 0;
+    myblockdev_disk->minors = MYBLOCKDEV_MINORS;
+    myblockdev_disk->fops = &myblockdev_fops;
+    myblockdev_disk->queue = myblockdev_queue;
+    sprintf(myblockdev_disk->disk_name, MYBLOCKDEV_NAME);
+    set_capacity(myblockdev_disk, MYBLOCKDEV_SIZE / 512);
+    add_disk(myblockdev_disk);
+    myblockdev_queue = blk_init_queue(myblockdev_request, NULL);
+    if (myblockdev_queue == NULL) {
+        printk(KERN_WARNING "myblockdev

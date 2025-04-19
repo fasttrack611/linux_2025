@@ -1,0 +1,460 @@
+http://www.cyberciti.biz/faq/linux-kernel-tuning-virtual-memory-subsystem/
+https://wiki.archlinux.org/index.php/sysctl
+http://askubuntu.com/questions/566361/cant-change-vm-dirty-ratio-with-etc-sysctl-conf
+https://www.kernel.org/doc/Documentation/sysctl/vm.txt  
+
+
+=================================================================================================
+
+       do_send_sig_info(SIGKILL, SEND_SIG_FORCED, p, true);
+
+
+sysctl_panic_on_oom
+   
+  schedule_timeout_killable(1);
+
+boot memory allocator.
+
+
+ cpu_relax();
+ cond_resched();
+
+
+
+asmlinkage void __exception_irq_entry
+asm_do_IRQ(unsigned int irq, struct pt_regs *regs){
+        handle_IRQ(irq, regs);
+}
+ wake_up_interruptible(&dev->wq);
+==============================================================
+http://www.nynaeve.net/?p=80 
+
+Stack tracer disabled
+
+"#\n"
+                 "# To enable the stack tracer, either add 'stacktrace' to the\n"
+                 "# kernel command line\n"
+                 "# or 'echo 1 > /proc/sys/kernel/stack_tracer_enabled'\n"
+                 "
+
+
+# define KGDB_MAX_BREAKPOINTS   1000
+#endif
+#define KGDB_HW_BREAKPOINT      1
+=====================================================================================================================
+
+The configuration registers are at addresses 0x00 - 0x45.
+Use 
+i2c_smbus_write_byte_data() to write a register and
+
+i2c_smbus_read_byte_data() to read a register.
+The command is the register number.
+
+Examples:
+To write a 1 to register 0x45:
+
+
+i2c_smbus_write_byte_data(fd, 0x45, 1);
+
+To read register 0x45:
+  value = i2c_smbus_read_byte_data(fd, 0x45);
+
+
+
+
+drivers/iio/light/tcs3472.c
+
+
+        ret = i2c_smbus_read_byte_data(data->client, KXCJK1013_REG_WHO_AM_I);
+        ret = i2c_smbus_write_byte_data(data->client, KXCJK1013_REG_CTRL1,ret);
+        ret = i2c_smbus_read_i2c_block_data(data->client,
+                data_reg, sizeof(buf), (u8 *) &buf);
+
+==================================================================================================================================================
+
+        spin_lock_irqsave(&emif_lock, irq_state);
+
+        spin_unlock_irqrestore(&emif_lock, irq_state);
+
+        writel(EMIF_EXT_PHY_CTRL_1_VAL, base + EMIF_EXT_PHY_CTRL_1_SHDW);
+
+
+	Temperature far too high - do kernel_power_off()
+ 
+	>> kernel_power_off();  ( "kernel/reboot.c" ) 
+
+
+==================================================================================================================================================
+
+        case LINUX_REBOOT_CMD_RESTART:
+                kernel_restart(NULL);
+
+		>>  kernel_halt();
+
+=========================================================================
+
+	preempt_disable();
+                pmic_access_shared_data = vmm_pmic_get_shared_data();
+        preempt_enable();
+
+=============================================================================================
+static ssize_t tadi_write(struct file *p_file, const char __user *user_buffer, size_t count, loff_t *position)
+
+ p_tadi_priv = (struct s_tadi_priv *)p_file->private_data;
+        buffer = kmalloc(count, GFP_KERNEL);
+        if (!buffer)
+                return -ENOMEM;
+        ret = copy_from_user(buffer, user_buffer, count);
+        
+static ssize_t tadi_read(struct file *file_ptr, char __user *user_buffer, size_t count, loff_t *position){
+        unsigned ret = 0;
+
+        #define TADI_ERROR_MSG "Error: read op from tadi not allowed\n"
+        TADI_DBG("read at offset = %i, bytes count = %u",
+                        (int)*position,
+                        (unsigned int)count);
+
+        ret = copy_to_user(user_buffer, TADI_ERROR_MSG, sizeof(TADI_ERROR_MSG));
+        if (ret)
+                
+=========================================================================
+
+i2s Transfer 
+davinci_i2s_trigger 
+"sound/soc/davinci/davinci-i2s.c"
+
+=========================================================================
+When the kernel invokes the local_bh_enable( ) function[*] to enable softirqs on the local CPU
+
+===============================================================================================
+Declaring your tasklets
+
+Tasklets can be created dynamically and statically depending upon requirement.
+
+Statically Creation :: DECLARE_TASKLET(name,func,data)
+
+static void pvc_display(unsigned long data){
+        int i;
+
+        pvc_clear();
+        for (i = 0; i < PVC_NLINES; i++)
+                pvc_write_string(pvc_lines[i], 0, i);
+}
+
+static DECLARE_TASKLET(pvc_display_tasklet, &pvc_display, 0);
+
+
+static ssize_t pvc_line_proc_write(struct file *file, const char __user *buf,
+                                   size_t count, loff_t *pos){
+ 
+        tasklet_schedule(&pvc_display_tasklet);
+
+}
+
+====================================================================
+
+Let's suppose you're writing a device driver and you want to use a tasklet: what has to be done? First of all,
+ you should allocate a new tasklet_struct data structure and initialize it by invoking tasklet_init( ); this function receives as its parameters the address of the tasklet descriptor, the address of your tasklet function, and its optional integer argument.
+
+The tasklet may be selectively disabled by invoking either tasklet_disable_nosync( ) or tasklet_disable( ). Both functions increase the count field of the tasklet descriptor, but the latter function does not return until an already running instance of the tasklet function has terminated. To reenable the tasklet, use tasklet_enable( ).
+
+To activate the tasklet, you should invoke either the tasklet_schedule( ) function or the tasklet_hi_schedule( ) function, according to the priority that you require for the tasklet. The two functions are very similar; each of them performs the following actions:
+
+============================================================================
+
+static void do_wakeup(unsigned long data){
+        while (error_count > 0)
+                kmemcheck_error_recall();
+
+        if (error_missed_count > 0) {
+                printk(KERN_WARNING "kmemcheck: Lost %d error reports because "
+                        "the queue was too small\n", error_missed_count);
+                error_missed_count = 0;
+        }
+}
+
+
+
+static DECLARE_TASKLET(kmemcheck_tasklet, &do_wakeup, 0);
+
+tasklet_hi_schedule_first(&kmemcheck_tasklet);
+
+void kmemcheck_error_save_bug(struct pt_regs *regs){
+
+tasklet_hi_schedule_first(&kmemcheck_tasklet);
+================================================================================
+
+"drivers/dma/tegra20-apb-dma.c"
+
+struct tegra_dma_channel {
+struct tasklet_struct	tasklet;
+
+}
+
+static void tegra_dma_tasklet(unsigned long data){
+
+
+}
+
+
+static irqreturn_t tegra_dma_isr(int irq, void *dev_id){
+spin_lock_irqsave(&tdc->lock, flags);
+
+	status = tdc_read(tdc, TEGRA_APBDMA_CHAN_STATUS);
+	if (status & TEGRA_APBDMA_STATUS_ISE_EOC) {
+		tdc_write(tdc, TEGRA_APBDMA_CHAN_STATUS, status);
+		tdc->isr_handler(tdc, false);
+		tasklet_schedule(&tdc->tasklet);
+		spin_unlock_irqrestore(&tdc->lock, flags);
+
+}
+
+static int tegra_dma_probe(struct platform_device *pdev){
+
+		tasklet_init(&tdc->tasklet, tegra_dma_tasklet,(unsigned long)tdc);
+
+err_irq:
+	while (--i >= 0) {
+		struct tegra_dma_channel *tdc = &tdma->channels[i];
+		tasklet_kill(&tdc->tasklet);
+
+
+}
+
+
+
+
+static int tegra_dma_remove(struct platform_device *pdev){
+
+
+	for (i = 0; i < tdma->chip_data->nr_channels; ++i) {
+		tdc = &tdma->channels[i];
+		tasklet_kill(&tdc->tasklet);
+	}
+}
+==========================================================================
+			Work Q
+==========================================================================
+
+static int edac_workqueue_setup(void){
+
+        edac_workqueue = create_singlethread_workqueue("edac-poller");
+        if (edac_workqueue == NULL)
+                return -ENODEV;
+        else
+                return 0;
+}
+
+
+ Setup/Initialize the workq for this core 
+
+        /* Setup/Initialize the workq for this core */
+        err = edac_workqueue_setup();
+        if (err) {
+                edac_printk(KERN_ERR, EDAC_MC, "init WorkQueue failure\n");
+                goto error;
+        }
+
+static void edac_workqueue_teardown(void){
+
+        if (edac_workqueue) {
+                flush_workqueue(edac_workqueue);
+                destroy_workqueue(edac_workqueue);
+                edac_workqueue = NULL;
+        }
+}
+
+=============================================================================
+
+
+
+static struct workqueue_struct *cfag12864b_workqueue;
+
+static DECLARE_DELAYED_WORK(cfag12864b_work, cfag12864b_update);
+
+static void cfag12864b_queue(void)
+{
+        queue_delayed_work(cfag12864b_workqueue, &cfag12864b_work, HZ / cfag12864b_rate);
+}
+
+
+
+void cfag12864b_disable(void){
+
+
+        if (cfag12864b_updating) {
+                cfag12864b_updating = 0;
+                cancel_delayed_work(&cfag12864b_work);
+                flush_workqueue(cfag12864b_workqueue);
+        }
+}
+
+
+
+static void cfag12864b_update(struct work_struct *work){
+
+        if (memcmp(cfag12864b_cache, cfag12864b_buffer, CFAG12864B_SIZE)) {
+                for (i = 0; i < CFAG12864B_CONTROLLERS; i++) {
+                        cfag12864b_controller(i);
+                        cfag12864b_nop();
+     }
+ 
+
+/*
+ * Module Init & Exit
+ */
+
+static int __init cfag12864b_init(void){
+        cfag12864b_cache = kmalloc(sizeof(unsigned char) *
+                CFAG12864B_SIZE, GFP_KERNEL);
+        if (cfag12864b_cache == NULL) {
+                printk(KERN_ERR CFAG12864B_NAME ": ERROR: "
+                        "can't alloc cache buffer (%i bytes)\n",
+                        CFAG12864B_SIZE);
+                ret = -ENOMEM;
+                goto bufferalloced;
+        }
+
+        cfag12864b_workqueue = create_singlethread_workqueue(CFAG12864B_NAME);
+        if (cfag12864b_workqueue == NULL)
+                goto cachealloced;
+
+}
+=================================================================================================
+static struct workqueue_struct *cmndworkqueue;
+static struct workqueue_struct *pollworkqueue;
+static struct workqueue_struct *deadworkqueue;
+
+static void vub300_queue_cmnd_work(struct vub300_mmc_host *vub300){
+        kref_get(&vub300->kref);
+        if (queue_work(cmndworkqueue, &vub300->cmndwork)) {
+                /*
+       
+}
+static void vub300_mmc_request(struct mmc_host *mmc, struct mmc_request *req){  
+                      
+  vub300_queue_cmnd_work(vub300);
+}
+
+
+static int __init vub300_init(void){
+
+  	cmndworkqueue = create_singlethread_workqueue("kvub300c");
+        if (!cmndworkqueue) {
+                pr_err("not enough memory for the REQUEST workqueue");
+                result = -ENOMEM;
+                goto out1;
+        }
+        pollworkqueue = create_singlethread_workqueue("kvub300p");
+        if (!pollworkqueue) {
+                pr_err("not enough memory for the IRQPOLL workqueue");
+                result = -ENOMEM;
+                goto out2;
+        }
+        deadworkqueue = create_singlethread_workqueue("kvub300d");
+        if (!deadworkqueue) {
+                pr_err("not enough memory for the EXPIRED workqueue");
+                result = -ENOMEM;
+                goto out3;
+        }
+
+out4:
+        destroy_workqueue(deadworkqueue);
+out3:
+        destroy_workqueue(pollworkqueue);
+out2:
+        destroy_workqueue(cmndworkqueue);
+                                                                                                                                            
+}
+
+
+static void vub300_queue_cmnd_work(struct vub300_mmc_host *vub300){
+        kref_get(&vub300->kref);
+        if (queue_work(cmndworkqueue, &vub300->cmndwork)) 
+  }
+
+static void vub300_queue_poll_work(struct vub300_mmc_host *vub300, int delay){
+        kref_get(&vub300->kref);
+        if (queue_delayed_work(pollworkqueue, &vub300->pollwork, delay)) {
+                /*
+}    
+
+
+static int vub300_probe(struct usb_interface *interface, const struct usb_device_id *id){
+
+        usb_set_intfdata(interface, vub300);
+        INIT_DELAYED_WORK(&vub300->pollwork, vub300_pollwork_thread);
+        INIT_WORK(&vub300->cmndwork, vub300_cmndwork_thread);
+        INIT_WORK(&vub300->deadwork, vub300_deadwork_thread);
+        kref_init(&vub300->kref);
+        init_timer(&vub300->sg_transfer_timer);
+        vub300->sg_transfer_timer.data = (unsigned long)vub300;
+        vub300->sg_transfer_timer.function = vub300_sg_timed_out;
+
+}
+
+
+static void __exit vub300_exit(void)
+{
+        usb_deregister(&vub300_driver);
+        flush_workqueue(cmndworkqueue);
+        flush_workqueue(pollworkqueue);
+        flush_workqueue(deadworkqueue);
+        destroy_workqueue(cmndworkqueue);
+        destroy_workqueue(pollworkqueue);
+        destroy_workqueue(deadworkqueue);
+}
+
+===========================================================================================================
+
+
+/**
+ * pmic_battery_monitor - monitor battery status
+ * @work: work structure
+ * Context: can sleep
+ *
+ * PMIC battery status needs to be monitored for any change
+ * and information needs to be frequently updated.
+ */
+static void pmic_battery_monitor(struct work_struct *work)
+{
+        struct pmic_power_module_info *pbi = container_of(work,
+                        struct pmic_power_module_info, monitor_battery.work);
+
+        /* update pmic_power_module_info members */
+        pmic_battery_read_status(pbi);
+        queue_delayed_work(pbi->monitor_wqueue, &pbi->monitor_battery, HZ * 10);
+}
+
+
+
+
+
+/* PMIC battery initializes its internal data structue and other
+ * infrastructure components for it to work as expected.
+ */
+
+static int probe(int irq, struct device *dev){
+   
+    /* initialize all required framework before enabling interrupts */
+        INIT_WORK(&pbi->handler, pmic_battery_handle_intrpt);
+        INIT_DELAYED_WORK(&pbi->monitor_battery, pmic_battery_monitor);
+        pbi->monitor_wqueue =   create_singlethread_workqueue(dev_name(dev));
+        if (!pbi->monitor_wqueue) {
+                dev_err(dev, "%s(): wqueue init failed\n", __func__);
+                retval = -ESRCH;
+                goto wqueue_failed;
+        }
+
+        /* register interrupt */
+        retval = request_irq(pbi->irq, pmic_battery_interrupt_handler,
+                                                        0, DRIVER_NAME, pbi);
+        if (retval) {
+                dev_err(dev, "%s(): cannot get IRQ\n", __func__);
+                goto requestirq_failed;
+        }
+
+
+        queue_delayed_work(pbi->monitor_wqueue, &pbi->monitor_battery, HZ * 1);
+        
+

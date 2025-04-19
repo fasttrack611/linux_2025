@@ -1,0 +1,313 @@
+
+
+Moving interrupts to threads
+
+
+Processing interrupts from the hardware is a major source of latency in the kernel, because other interrupts are blocked while doing that processing. 
+For this reason, the realtime tree has a feature, called threaded interrupt handlers, that seeks to reduce the time spent with interrupts disabled to a bare minimum—pushing the rest of the processing out into kernel threads. But it is not just realtime kernels that are interested in lower latencies, so threaded handlers are being proposed for addition to the mainline.
+
+Reducing latency in the kernel is one of the benefits, but there are other advantages as well. The biggest is probably reducing complexity by simplifying or avoiding locking between the "hard" and "soft" parts of interrupt handling. Threaded handlers will also help the debuggability of the kernel and may eventually lead to the removal of tasklets from Linux. For these reasons, and a few others as well, Thomas Gleixner has posted a set of patches and a "request for comments" to add threaded interrupt handlers.
+
+Traditionally, interrupt handling has been done with top half (i.e. the "hard" irq) that actually responds to the hardware interrupt and a bottom half (or "soft" irq) that is scheduled by the top half to do additional processing. The top half executes with interrupts disabled, so it is imperative that it do as little as possible to keep the system responsive. 
+
+Threaded interrupt handlers reduce that work even further, so the top half would consist of a "quick check handler" that just ensures the interrupt is from the device; 
+if so, it simply acknowledges the interrupt to the hardware and tells the kernel to wake the interrupt handler thread.
+
+In the realtime tree, nearly all drivers were mass converted to use threads, but the patch Gleixner proposes makes it optional—driver maintainers can switch if they wish to.
+Automatically converting drivers is not necessarily popular with all maintainers, but it has an additional downside as Gleixner notes: "Converting an interrupt to threaded makes only sense when the handler code takes advantage of it by integrating tasklet/softirq functionality and simplifying the locking."
+
+A driver that wishes to request a threaded interrupt handler will use:
+
+    int request_threaded_irq(unsigned int irq, irq_handler_t handler,
+	    		     irq_handler_t quick_check_handler,
+			     unsigned long flags, const char *name, void *dev)
+
+This is essentially the same as request_irq() with the addition of the quick_check_handler. As requested by Linus Torvalds at this year's Kernel Summit,
+a new function was introduced rather than changing countless drivers to use a new request_irq().
+The quick_check_handler checks to see if the interrupt was from the device, returning IRQ_NONE if it isn't. It can also return IRQ_HANDLED if no further processing is required or IRQ_WAKE_THREAD to wake the handler thread. One other return code was added to simplify converting to a threaded handler. A quick_check_handler can be developed prior to the handler being converted; in that case, it returns IRQ_NEEDS_HANDLING (instead of IRQ_WAKE_THREAD) which will call the handler in the usual way.
+
+request_threaded_irq() will create a thread for the interrupt and put a pointer to it in the struct irqaction. In addition, a pointer to the struct irqaction has been added to the task_struct so that handlers can check the action flags for newly arrived interrupts. That reference is also used to prevent thread crashes from causing an oops. One of the few complaints seen so far about the proposal was a concern about wasting four or eight bytes in each task_struct that was not an interrupt handler (i.e. the vast majority). That structure could be split into two types, one for the kernel and one for user space, but it is unclear whether that will be necessary.
+
+Andi Kleen has a more general concern that threaded interrupt handlers will lead to bad code: "to be honest my opinion is that it will encourage badly written interrupt code longer term," but he seems to be in the minority. There were relatively few comments, but most seemed in favor—perhaps many are waiting to see the converted driver as Gleixner promises to deliver "real soon". If major obstacles don't materialize, one would guess the linux-next tree would be a logical next step, possibly followed by mainline merging for 2.6.29.
+
+
+=============================================================================================================================================================================================
+How "container_of" macro works, & an Example
+
+Here iam giving a small code snippet that gives and idea about working of "container_of", this posed me little difficulty in understanding, after google-ing i got some examples and after working on that i wrote a simple C application that depicts its working. here i have defined two macros "offsetof" and "container_of" which i have extracted from "kernel.h" header. 
+       Please interpret this code and try some trick to understand "container_of".
+
+container_of macro is defined in linux/kernel.h
+
+syntax: container_of( pointer, container_type, container_field );
+
+This macro takes a pointer to a filed name container_field, within a structure of type container_type, and returns a pointer to the containing structure .
+simply this is a convenience macro that may be used to obtain a pointer to a structure from a pointer to some other structure contained with in it. 
+
+
+Code :
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+
+#define container_of(ptr, type, member) ({            \
+ const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
+ (type *)( (char *)__mptr - offsetof(type,member) );})
+
+struct test1 {
+ int a;
+};
+
+struct test2 {
+ int b;
+ struct test1 z;
+ int c;
+};
+
+int main() {
+ /* existing structure */
+ struct test2 *obj;
+ obj = malloc(sizeof(struct test2));
+ if(obj == NULL){
+       printf("Error: Memory not allocated...!\n");
+ }
+ obj->z.a = 51;
+ obj->b = 43;
+ obj->c = 53;
+ 
+ /* pointer to existing entry */    
+ struct test1 *obj1 = &obj->z;
+ struct test2 *obj2 = container_of(obj1, struct test2, z);
+
+ printf("obj2->b = %d\n", obj2->b);
+
+ return EXIT_SUCCESS;
+}
+
+=======================================================================================================
+
+What is the difference between tasklet and workqueue
+
+Tasklets:
+
+are old (around 2.3 I believe)
+have a straightforward, simple API
+are designed for low latency
+cannot sleep (run atomically in soft IRQ context and are guaranteed to never run on more than one CPU of a given processor, for a given tasklet)
+
+Work queues:
+
+are more recent (introduced in 2.5) have a flexible API (more options/flags supported)
+are designed for higher latency can sleep
+
+Bottom line is: Use tasklets for high priority, low latency atomic tasks that must still execute outside the hard IRQ context.
+
+You can control some level of priority with tasklets using tasklet_hi_enable/tasklet_hi_schedule (instead of their respective no-_hi versions). From this IBM page:
+
+The normal-priority schedule is performed through the TASKLET_SOFTIRQ-level softirq, where high priority is through the HI_SOFTIRQ-level softirq.
+
+...
+
+Tasklets from the high-priority vector are serviced first, followed by those on the normal vector. Note that each CPU maintains its own normal and high-priority softirq vectors.
+
+With work queues, when creating one, you will use alloc_workqueue (create_workqueue is deprecated) and can pass a flag to ask for higher priority:
+
+WQ_HIGHPRI:
+
+Work items of a highpri wq are queued to the highpri thread-pool of the target gcwq. Highpri thread-pools are served by worker threads with elevated nice level.
+Note that normal and highpri thread-pools don't interact with each other. Each maintain its separate pool of workers and implements concurrency management among its workers.
+
+
+====================================================================================================================================================
+
+The kernel keeps a list of all registered system calls in the system call table, stored in sys_call_table. 
+This table is architecture dependent and typically defined in enTRy.S, 
+which for x86 is in arch/i386/kernel/. This table assigns each valid syscall to a unique syscall number.
+
+kernel exists in a protected memory space.
+Instead, user-space applications must somehow signal the kernel that they want to execute a system call
+and have the system switch to kernel mode, where the system call can be executed in kernel-space by 
+the kernel on behalf of the application.
+
+The mechanism to signal the kernel is a software interrupt:
+Incur an exception and then the system will switch to kernel mode and execute the exception handler.
+The exception handler, in this case, is actually the system call handler. 
+The defined software interrupt on x86 is the int $0x80 instruction. 
+It triggers a switch to kernel mode and the execution of exception vector 128, which is the system call handler.
+The system call handler is the aptly named function system_call().
+It is architecture dependent and typically implemented in assembly in entry.S
+
+The system_call() function checks the validity of the given system call number by comparing it to NR_syscalls. If it is larger than or equal to NR_syscalls, the function returns -ENOSYS. Otherwise, the specified system call is invoked:
+
+call *sys_call_table(,%eax,4)
+===========================================================================================================================================================================
+In process context, the kernel is capable of sleeping (for example, if the system call blocks on a call or explicitly calls schedule()) and is fully preemptible. 
+These two points are important. First, the capability to sleep means that system calls can make use of the majority of the kernel's functionality. 
+
+What differentiates interrupt handlers from other kernel functions is that the kernel invokes them in response to interrupts and that they run in a special context 
+called interrupt context.
+
+The bottom half runs in the future, at a more convenient time, with all interrupts enabled. 
+Fast interrupt handlers run with all interrupts disabled on the local processor.This enables a fast handler to complete quickly, without possible interruption from other interrupts.
+
+SA_SHIRQ This flag specifies that the interrupt line can be shared among multiple interrupt handlers. Each handler registered on a given line must specify this flag; otherwise, only one handler can exist per line. More information on shared handlers is provided in a following section.
+
+The interrupt handler is normally marked static because it is never called directly from another file.
+
+---------------------------------------------------------------------------
+Reentrancy and Interrupt Handlers
+Interrupt handlers in Linux need not be reentrant. When a given interrupt handler is executing, the corresponding interrupt line is masked out on all processors, preventing another interrupt on the same line from being received. Normally all other interrupts are enabled, so other interrupts are serviced, but the current line is always disabled. Consequently, the same interrupt handler is never invoked concurrently to service a nested interrupt. This greatly simplifies writing your interrupt handler.
+
+Interrupt Context
+When executing an interrupt handler or bottom half, the kernel is in interrupt context. Recall that process context is the mode of operation the kernel 
+is in while it is executing on behalf of a process for example, executing a system call or running a kernel thread. In process context, the current macro points to the associated task. Furthermore, because a process is coupled to the kernel in process context, process context can sleep or otherwise invoke the scheduler.
+
+Interrupt context, on the other hand, is not associated with a process. The current macro is not relevant (although it points to the interrupted process). Without a backing process, interrupt context cannot sleephow would it ever reschedule? Therefore, you cannot call certain functions from interrupt context. If a function sleeps, you cannot use it from your interrupt handlerthis limits the functions that one can call from an interrupt handler.
+ 
+
+The kernel stack is two pages in size; typically, that is 8KB on 32-bit architectures and 16KB on 64-bit architectures
+==============================================================================================================================
+
+Static Vs Dynamic Mapping of Physical Address to Virtual Address ARM
+======================================================
+
+Static Method of IO Mapping: void iotable_init(struct map_desc *, int);
+======================================================
+static struct map_desc assabet_io_desc[] __initdata = {
+/* virtual physical length type */
+{ 0xf1000000, 0x12000000, 0x00100000, MT_DEVICE }, /* Board Control
+/* Register */
+{ 0xf2800000, 0x4b800000, 0x00800000, MT_DEVICE } /* MQ200 */
+};
+
+Because of static mappings for the devices we can use readl,readl_relaxed etc
+readl(addr)--->the "addr" is the translation of Phys addr of the particular device to VIRT addr.
+
+Dynamic Method of IO Mapping
+================================================================================================
+
+-request_mem_region() and ioremap() ioremap() is used in memory mapped peripherals
+Q) So what is the difference between these two methods of creating physical to virtual address mappping? 
+
+The iotable_init () call creates a static mapping between known
+physical and virtual addresses. The ioremap () call creates a dynamic
+mapping between a known physical address and an allocated virtual
+address. iotable_init () has the limitation that the size must be a
+multiple of pages. ioremap () will map any size region.
+
+Like many elements of software, it has to do with use. For example,the static mappings allow you to make constant references to the
+registers. The dynamic mappings require indirection through a pointer. On the other hand, the dynamic mappings prevent the drivers
+from being hard coded for specific addresses.
+
+Ex:Usage of ioremap in drivers virt_addr = ioremap(phys_addr,size)
+mem_reg = ioremap(0x2100ff00,4)
+writel_relaxed(0x34,mem_reg)
+================================================================================================
+
+
+cache coherence
+
+In a shared memory multiprocessor with a separate cache memory for each processor , it is possible to have many copies of any one instruction operand :
+ one copy in the main memory and one in each cache memory. When one copy of an operand is changed, the other copies of the operand must be changed also. 
+Cache coherence is the discipline that ensures that changes in the values of shared operands are propagated throughout the system in a timely fashion.
+
+There are three distinct levels of cache coherence:
+
+Every write operation appears to occur instantaneously.
+All processes see exactly the same sequence of changes of values for each separate operand.
+Different processes may see an operand assume different sequences of values. (This is considered noncoherent behavior.)
+In both level 2 behavior and level 3 behavior, a program can observe stale data . Recently, computer designers have come to realize that the programming discipline required to deal with level 2 behavior is sufficient to deal also with level 3 behavior. Therefore, at some point only level 1 and level 3 behavior will be seen in machines.
+
+
+
+ Cache coherence
+
+The ICache and DCache contain copies of information normally held in main memory. If these copies of memory information get out of step with each other because one is updated and the other is not updated, they are said to have become incoherent. If the DCache contains a line that has been modified by a store or swap instruction, and the main memory has not been updated, 
+the cache line is said to be dirty. Clean operations force the cache to write dirty lines back to main memory. 
+
+The ICache then has to be made coherent with a changed area of memory after any changes to the instructions that appear at an MVA, and before the new instructions are executed.
+On the ARM920T, software is responsible for maintaining coherence between main memory, the ICache, and the DCache.
+
+Register 7, cache operations register describes facilities for invalidating the entire ICache or individual ICache lines, and for cleaning and/or invalidating DCache lines, or for invalidating the entire DCache.
+To clean the entire DCache efficiently, software must loop through each cache entry using the clean D single entry (using index) operation or the clean and invalidate D entry (using index) operation. You must perform this using a two-level nested loop going though each index value for each segment. See DCache organization.
+Example 4.4 shows an example loop for two alternative DCache cleaning operations.
+Example 4.4. DCache cleaning loop
+for seg = 0 to 7	
+	for index = 0 to 63
+		Rd = {seg,index}
+		MCR p15,0,Rd,c7,c10,2				; Clean DCache single	
+						; entry (using index)			
+			or	
+	
+		MCR p15,0,Rd,c7,c14,2				; Clean and Invalidate	
+						; DCache single entry
+						; (using index)
+	next index
+next seg
+DCache, ICache, and memory coherence is generally achieved by:
+cleaning the DCache to ensure memory is up to date with all changes invalidating the ICache to ensure that the ICache is forced to re-fetch instructions from memory.
+Software can minimize the performance penalties of cleaning and invalidating caches by:
+Cleaning only small portions of the DCache when only a small area of memory has to be made coherent, for example, when updating an exception vector entry. Use Clean DCache single entry (using MVA) or Clean and Invalidate DCache single entry (using MVA).
+Invalidating only small portions of the ICache when only a small number of instructions are modified, for example, when updating an exception vector entry. Use Invalidate ICache single entry (using MVA).
+Not invalidating the ICache in situations where it is known that the modified area of memory cannot be in the cache, for example, when mapping a new page into the currently running process.
+Situations that necessitate cache cleaning and invalidating include:
+Writing instructions to a cachable area of memory using STR or STM instructions, for example:
+self-modifying code
+JIT compilation
+copying code from another location
+downloading code using the EmbeddedICE JTAG debug features
+updating an exception vector entry.
+Another bus master, such as a DMA controller, modifying a cachable area main memory.
+Turning the MMU on or off.
+Changing the virtual-to-physical mappings, or Ctt, or Btt, or protection information, in the MMU page tables. The DCache must be cleaned, and both caches invalidated, before the cache and write buffer configuration of an area of memory is changed by modifying Ctt or Btt in the MMU translation table descriptor. This is not necessary if it is known that the caches cannot contain any entries from the area of memory whose translation table descriptor is being modified.
+Turning the ICache or DCache on, if its contents are no longer coherent.
+Changing the FCSE PID in CP15 register 13 does not change the contents of the cache or memory, and does not affect the mapping between cache entries and physical memory locations. It only changes the mapping between ARM9TDMI addresses and cache entries. This means that changing the FCSE PID does not lead to any coherency issues. No cache cleaning or cache invalidation is required when the FCSE PID is changed.
+The software design must also consider that the pipelined design of the ARM9TDMI core means that it fetches three instructions ahead of the current execution point. So, for example, the three instructions following an MCR that invalidates the ICache, have already been read from the ICache before it is invalidated.
+
+
+
+
+Data cache enable/disable and reset
+The D Cache is automatically disabled and flushed on reset. If the D Cache is subsequently disabled, further D Cache searches are prevented. This has the effect of making all data accesses non-cacheable and forcing the ARM940T to perform external accesses. The write buffer control is still decoded from the GBd and the GCd bit, the latter being forced to 0 (non-cacheable) when the D Cache is disabled.
+Writing to the CP15 control register bit 2 enables the D Cache. This should only be done if bit 0 is already set, enabling the protection unit. These two bits can be written to at the same time, enabling the D Cache and protection unit. The D Cache can be disabled by clearing bit 2 of the CP15 control register.
+
+
+
+
+
+Some ARM cores like the ARM9 family of cores have a Harvard Architecture, at least at the cache level. That is they access two seperate caches, 
+an I-cache for instructions and a D-cache for data ( example ARM926EJ-S ).
+
+However the I & D caches wind up being interfaced to plain vanilla SDRAM externally.
+So it seems that at the RAM level we are back to the von Neumann design where one store ( SDRAM ) holds instructions >and< data.
+
+In the example designs I've seen there seems to be just one single bus interfacing the SDRAM to the SOC chip.
+
+How are the instructions and data differentiated, sorted and routed from the combined bus interfacing the external SDRAM to the internal I and D caches?
+
+http://comments.gmane.org/gmane.linux.ports.arm.kernel/133855
+
+Last question is why D-cache is disabled but I-caches is able? To speed up instrument process?
+
+The MMU has settings to determine which memory regions are cacheable or not. If you do not have the mmu on but you have the data cache on (if possible) then you cannot safely talk to peripherals. if you read the uart status register for example that goes through the cache just like any other data operation, whatever that status is stays in the cache for subsequent reads until such time as that cache line is evicted and you get one more shot at the actual register. Lets say for example you have some code that polls the uart status register waiting for a character in the rx buffer. If that first read shows there is no character, that status goes in the cache, you will remain in the loop forever since you will never get to talk to the status register again you will simply get the cached copy of the register. if there was a character in there then that status also gets cached, you read the rx register, and perhaps do something, if when you come back again if the status has not been evicted from the data cache then you get the stale status which shows there is a character, you rx buffer read may or may not also be cached so you may get the stale value in the cache, you may get a stale value or whatever the peripheral does when you read and there is no new value or you might get a new value, but what you dont get in these situations is proper access to the peripheral. When the mmu is on, you use the mmu to mark the address space used by that peripheral as non-(data)-cacheable, and you dont have this problem. With the mmu off you need the data cache off for arm systems.
+
+Leaving the I-cache on is okay because instruction fetches only read instructions...Well for a bare metal application that is okay, it helps for example if you are using a flash that has a potential for read disturb (spi or i2c flashes). The problem is this application is a bootloader, so you must take some extra care. For example your bootloader has some code at address 0x8000 that it runs through at least once, then you choose to use it as a bootloader, the bootloader might be at say address 0x10000000 allowing you to load a new program at 0x8000, this load uses data accesses so it does not go through the instruction cache. So there is a potential that the instruction cache has some or all of the code from the last time you were in the 0x8000 area, and when you branch to the bootloaded code at 0x8000 you will get either the old program from cache or a nasty mixture of old program and new program for the parts that are cached and not cached. So if your bootloader allows for the i-cache to be on, you need to invalidate the cache before branching to bootloaded code.
+
+Lastly, if you or anyone using this bootloader wants to use jtag, then you have that same problem but worse, data cycles that do not go through the i-cache are used to write the new program to ram, when you tell the jtag debugger to then run the new program you will get 1) only the new program, 2) a mixture of the new program and old program fragments from cache 3) the old program from cache.
+
+So d-cache is bad without an mmu because of things that are not in ram, peripherals, etc. The i-cache is a use at your own risk kind of thing which you can mitigate except for the times that jtag is used for debugging.
+
+If you have concerns or have confirmed read-disturb in your (external) flash, then I recommend turn on the i-cache, use a tight loop to copy your application to ram, branch to the ram copy and run there, turn off the i-cache (or use at your own risk) and dont touch the flash again, certainly not heavy read accesses to small areas. A tight uart polling loop like you might have for a command line parser, is a really good place to get hit with read-disturb.
+
+
+You did not specified on which ARM you are working. Capabilities may vary from one ARM to an other (there is a huge gap between an ARM9 and an ARM Cortex A15).
+
+In the given code, bit 2 is cleared and then set, but it does not matter, as those changes are done in R0. 
+There is no change in the ARM behavior until the write in CP15 register (done by the instruction mcr P15, 0, R0, C1, C0, 0).
+
+Concerning d-cache/i-cache enabling, it is only a matter of choice, there is no requirement. On the products I work on, the bootloader enables L1 I-cache, D-cache, L2 cache, and MMU (and it disables all that stuff before jumping on Linux). Be sure to follow ARM documentations about cache invalidation and memory barriers (according to your actual ARM Core) if you use cache and MMU in your bootloader.
+
+
+Chapter 12: Caches > 12.5 Flushing and Cleaning Cache Memory

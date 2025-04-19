@@ -1,0 +1,64 @@
+
+In Linux device drivers, the ioremap function is used to map physical memory into the kernel's virtual address space.
+ This is typically done for memory-mapped I/O (MMIO) regions, which are used to access hardware registers and other device-specific memory locations.
+
+When a device is initialized, its MMIO region(s) are usually mapped into kernel space using the ioremap function. 
+This function takes a physical address and a size as input, 
+and returns a virtual address that can be used to access the corresponding physical memory. 
+The virtual address returned by ioremap is guaranteed to be contiguous and kernel-reserved.
+
+Once the MMIO region has been mapped into kernel space, the device driver can access it using normal memory read and write operations, 
+such as readl and writel. These operations are used to read from and write to the MMIO region, and are defined in the <asm/io.h> header file.
+
+It is important to note that the ioremap function should only be used for memory-mapped I/O regions, and not for regular system memory. 
+In addition, it is important to properly synchronize access to the MMIO region, to ensure that multiple threads 
+or processes do not access the same hardware registers concurrently.
+
+Overall, ioremap is a key function in Linux device drivers, 
+allowing them to access hardware-specific memory locations using the kernel's virtual memory system.
+==============================================================================================================================
+
+
+  //ioremap L2 Cache Controller
+
+  //ioremap SDRAM controller
+
+
+r = request_mem_region(r->start, r->end - r->start + 1, pdev->name);
+pwm->mmio_base = ioremap(r->start, r->end - r->start + 1);
+
+https://byu-cpe.github.io/ecen427/labs/audio-driver/
+
+
+==============================================================================================================================
+
+mmap function in linux device driver 
+
+
+https://www.youtube.com/watch?v=k7nYEe4Dwek
+
+
+
+In Linux device drivers, the mmap function is used to map a device's memory or I/O registers into a user space process's virtual address space. 
+This allows the user space process to directly access the device's memory or registers, as if they were ordinary memory locations.
+
+The mmap function takes several parameters, including the file descriptor of the device, 
+the size of the memory or registers to be mapped, and various flags that control the mapping behavior. 
+The function returns a pointer to the mapped memory, which can be used by the user space process to read from and write to the device.
+
+To use mmap in a device driver, the driver must implement the mmap method in its file operations structure.
+ This method is called by the kernel whenever a user space process requests to map the device's memory or registers. 
+The mmap method typically performs some initialization, such as reserving memory for the mapping, and returns the virtual address of the mapped memory.
+
+It is important to properly synchronize access to the device's memory or registers,
+to ensure that multiple processes or threads do not access the same hardware registers concurrently.
+This can be done using mutexes, semaphores, or other synchronization primitives provided by the kernel.
+
+Overall, the mmap function is a powerful tool for allowing user space processes to directly access device memory or registers,
+and can be used to implement efficient and high-performance device drivers. 
+However, it should be used with care, and proper synchronization and error handling mechanisms should be implemented to ensure the safety and reliability of the driver.
+
+
+
+https://github.com/paraka/mmap-kernel-transfer-data/blob/master/test-mmap.c
+https://github.com/paraka/mmap-kernel-transfer-data/blob/master/mmap-example.c

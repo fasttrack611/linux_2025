@@ -1,0 +1,132 @@
+Setting up coherent DMA mappings
+A driver can set up a coherent mapping with a call to dma_alloc_coherent:
+
+void *dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *dma_handle, int flag);
+
+This function handles both the allocation and the mapping of the buffer. The first two
+arguments are the device structure and the size of the buffer needed. The function
+returns the result of the DMA mapping in two places. The return value from the function
+is a kernel virtual address for the buffer, which may be used by the driver; the
+associated bus address, meanwhile, is returned in dma_handle.
+
+=====================================================================================
+
+fw_addr = dma_alloc_coherent(&pdev->dev, size, &dev_addr, GFP_KERNEL);
+	if (fw_addr) {
+		fw_addr = PTR_ALIGN(fw_addr, XRX200_GPHY_FW_ALIGN);
+		dev_addr = ALIGN(dev_addr, XRX200_GPHY_FW_ALIGN);
+		memcpy(fw_addr, fw->data, fw->size);
+	} else {
+		dev_err(&pdev->dev, "failed to alloc firmware memory\n");
+	}
+
+=====================================================================================
+
+host->sg_cpu = dma_alloc_coherent(&pdev->dev, PAGE_SIZE,
+					  &host->sg_dma, GFP_KERNEL);
+	if (!host->sg_cpu) {
+		dev_err(&pdev->dev, "Failed to allocate DMA descriptor mem\n");
+		ret = -ENOMEM;
+		goto error_free_host;
+	}
+
+
+error_free_dma:
+	dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+
+===============================================================================================================
+
+	dev->rtsx_resv_buf = dma_alloc_coherent(&(pci->dev), RTSX_RESV_BUF_LEN,
+			&(dev->rtsx_resv_buf_addr), GFP_KERNEL);
+	if (dev->rtsx_resv_buf == NULL) {
+		dev_err(&pci->dev, "alloc dma buffer fail\n");
+		err = -ENXIO;
+		goto errout;
+	}
+	dev->chip->host_cmds_ptr = dev->rtsx_resv_buf;
+
+
+if (dev->rtsx_resv_buf) {
+		dma_free_coherent(&(dev->pci->dev), RTSX_RESV_BUF_LEN,
+				dev->rtsx_resv_buf, dev->rtsx_resv_buf_addr);
+		dev->chip->host_cmds_ptr = NULL;
+		dev->chip->host_sg_tbl_ptr = NULL;
+	}
+
+===============================================================================================================
+
+	sport->tx_desc = dma_alloc_coherent(NULL,
+			fragcount * sizeof(struct dmasg), &addr, 0);
+
+===============================================================================================================
+
+	sport->tx_desc = dma_alloc_coherent(NULL, fragcount * sizeof(struct dmasg), &addr, 0);
+	sport->tx_desc_size = fragcount * sizeof(struct dmasg);
+
+
+
+===============================================================================================================
+      mspi->dma_dummy_tx = dma_map_single(dev, empty_zero_page, PAGE_SIZE,
+                                            DMA_TO_DEVICE);
+        if (dma_mapping_error(dev, mspi->dma_dummy_tx)) {
+                dev_err(dev, "unable to map dummy tx buffer\n");
+                goto err_dummy_tx;
+        }
+
+        mspi->dma_dummy_rx = dma_map_single(dev, fsl_dummy_rx, SPI_MRBLR,
+                                            DMA_FROM_DEVICE);
+        if (dma_mapping_error(dev, mspi->dma_dummy_rx)) {
+                dev_err(dev, "unable to map dummy rx buffer\n");
+                goto err_dummy_rx;
+        }
+
+
+
+===============================================================================================================
+
+                desc->des2 = dma_map_single(priv->device, skb->data,
+                                            bmax, DMA_TO_DEVICE);
+                if (dma_mapping_error(priv->device, desc->des2))
+                        return -1;
+
+                priv->tx_skbuff_dma[entry].buf = desc->des2;
+                desc->des3 = desc->des2 + BUF_SIZE_4KiB;
+                priv->hw->desc->prepare_tx_desc(desc, 1, bmax, csum,
+                                                STMMAC_RING_MODE);
+                wmb();
+                priv->tx_skbuff[entry] = NULL;
+                entry = (++priv->cur_tx) % txsize;
+
+
+
+
+
+===============================================================================================================
+
+           priv->rx_skbs[i] = alloc_skb(METH_RX_BUFF_SIZE, 0);
+                /* 8byte status vector + 3quad padding + 2byte padding,
+                 * to put data on 64bit aligned boundary */
+                skb_reserve(priv->rx_skbs[i],METH_RX_HEAD);
+                priv->rx_ring[i]=(rx_packet*)(priv->rx_skbs[i]->head);
+                /* I'll need to re-sync it after each RX */
+                priv->rx_ring_dmas[i] = dma_map_single(NULL, priv->rx_ring[i],
+                                        METH_RX_BUFF_SIZE, DMA_FROM_DEVICE);
+                mace->eth.rx_fifo = priv->rx_ring_dmas[i];
+
+
+
+
+===============================================================================================================
+
+
+
+
+
+===============================================================================================================
+
+
+
+
+===============================================================================================================
+
+

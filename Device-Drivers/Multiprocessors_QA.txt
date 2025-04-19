@@ -1,0 +1,65 @@
+Using Local APICs
+
+MP systems have a special bus to which all APICs in the system are connected.
+This bus is one of the ways the processors can communicate with one another (the other, of course, is shared memory). 
+APICs (both local and I/O) are memory mapped devices. The default location for the local APIC is at 0xfee00000 in physical memory.
+The local APIC will appear in the same place for each processor, but each processor will reference its own APIC; 
+the APIC intercepts memory references to its registers, and those references will not generate bus cycles on some systems. 
+Since APICs are mapped in high memory, the APs will have to switch to protected mode before they can intialise their local APICs.
+ If you like, you can map the APIC to a different address using the paging unit,
+but be sure to disable caching in the page table entry since some registers can change between accesses. For this reason, pointers to APIC registers should be volatile. 
+To initialise the BSP's local APIC, set the enable bit in the spurious interrupt vector register and set the error interrupt vector in the local vector table.
+
+
+Interprocessor Interrupts
+
+IPIs are used to maintain synchronisation between the processors. For example, if a kernel page table entry changes, both processors must either flush their TLBs or invalidate that particular page table entry. Whichever processor changed the mapping knows to do this automatically, but the other processor does not; 
+therefore, the processor which changed the mapping must send an IPI to the other processor to tell it to flush its TLB or invalidate the page table entry.
+Using the local APIC, you can send interrupts to all processors, all processors but the one sending the interrupt, or a specific processor or logical address as well as self-interrupts. 
+To send an IPI, write the destination APIC ID, if needed, into the high word of the ICR, then write the low word of ICR with the destination shorthand and interrupt vector set to send the IPI. Be sure to wrap these functions in spinlocks. You might want to turn off interrupts as well while sending IPIs.
+
+
+
+Surprisingly, some multicore chips are substantially better for multicore software development, particularly for SMP (symmetric multiprocessing) designs.
+Here are features to look for in a multicore processor that will make your life easier:
+Hardware cache coherency (otherwise, your code will take a 100x performance hit for all data passing through global memory).
+A hardware TLB (translation lookaside buffer) that performs virtual-to-physical address translation.
+Interprocessor interrupts (IPI). Without these, expect a performance hit on every kernal call.
+Memory coherency hardware
+Multicore debugging hardware (a standard trace port such as Nexus (IEEE-ISTO 5001-2003) or ARM’s CoreSight Embedded Trace Macrocell (ETM)).
+
+Interprocessor interrupts (IPIs)
+The processors communicate with each other through IPIs (interprocessor interrupts). IPIs can effectively schedule and control threads over multiple processors. For example, an IPI to another processor is often needed when:
+
+a higher-priority thread becomes ready
+a thread running on another processor is hit with a signal
+a thread running on another processor is canceled
+a thread running on another processor is destroyed
+
+Abbreviated as APIC, an Advanced Programmable Interrupt Controller is a PIC used to extend the number of IRQs available, has more available interrupt lines that a typical PIC and also supports distributed CPUs. APIC must be implemented on the motherboard and also supported by the operating system. APIC differs from PIC as it offers multiple APICs on a motherboard connected via a bus system. The CPU has a LOCAL APIC and the motherboard has at least one I/O APIC.
+
+=============================================================================================================================================
+Cache coherence
+=============================================================================================================================================
+A protocol for managing the caches of a multiprocessor system so that no data is lost or overwritten before the data is transferred from a cache to the target memory. 
+When two or more computer processors work together on a single program, known as multiprocessing, each processor 
+may have its own memory cache that is separate from the larger RAM that the individual processors will access.
+
+A memory cache, sometimes called a cache store or RAM cache, is a portion of memory made of high-speed static RAM (SRAM) instead 
+of the slower and cheaper dynamic RAM (DRAM) used for main memory. 
+
+Memory caching is effective because most programs access the same data or instructions over and over.
+By keeping as much of this information as possible in SRAM, the computer avoids accessing the slower DRAM.
+When multiple processors with separate caches share a common memory, it is necessary to keep the caches in a state of coherence
+by ensuring that any shared operand that is changed in any cache is changed throughout the entire system.
+
+This is done in either of two ways: through a directory-based or a snooping system. In a directory-based system,
+the data being shared is placed in a common directory that maintains the coherence between caches.
+
+The directory acts as a filter through which the processor must ask permission to load an entry from the primary memory to its cache.
+When an entry is changed the directory either updates or invalidates the other caches with that entry. 
+
+In a snooping system, all caches on the bus monitor (or snoop) the bus to determine if they have a copy of the block of data that is requested on the bus. 
+Every cache has a copy of the sharing status of every block of physical memory it has.
+Cache misses and memory traffic due to shared data blocks limit the performance of parallel computing in multiprocessor computers or systems.
+Cache coherence aims to solve the problems associated with sharing data.

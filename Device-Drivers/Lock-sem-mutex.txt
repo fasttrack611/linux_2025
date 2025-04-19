@@ -1,0 +1,123 @@
+What is the difference between spin lock, mutex,semaphore ?
+========================================================================================
+Kernel Locking Techniques
+
+Semaphores in Linux are sleeping locks. Because they cause a task to sleep on contention, 
+instead of spin, they are used in situations where the lock-held time may be long.
+Conversely, since they have the overhead of putting a task to sleep and subsequently waking it up, 
+they should not be used where the lock-held time is short. Since they sleep,
+however, they can be used to synchronize user contexts whereas spinlocks cannot.
+In other words, it is safe to block while holding a semaphore. 
+
+A "mutex" (or "mutual exclusion lock") is a signal that two or more asynchronous processes 
+can use to reserve a shared resource for exclusive use. The first process that obtains
+ownership of the "mutex" also obtains ownership of the shared resource. 
+Other processes must wait for for the first process to release it's ownership 
+of the "mutex" before they may attempt to obtain it.
+
+The most common locking primitive in the kernel is the spinlock. 
+The spinlock is a very simple single-holder lock. If a process attempts to acquire 
+a spinlock and it is unavailable, the process will keep trying (spinning) 
+until it can acquire the lock. This simplicity creates a small and fast lock.
+
+========================================================================================
+
+what is the difference between spin locks and semaphores?
+
+
+
+Both manage a limited resource. I'll first describe difference between binary semaphore (mutex) and spin lock.
+Spin locks perform a busy wait - i.e. it keeps running loop:
+
+while (try_acquire_resource ());
+...
+release();
+
+It performs very lightweight locking/unlocking but if the locking thread will be preempted
+ by other which will try to access the same resouce the second one will
+ simply try to acquitre resource untill it run out of it CPU quanta.
+
+
+On the other hand mutex behave more like:
+
+Spinlocks are used in an interrupt context, where sleeping is not allowed. 
+They poll in a tight loop, doing nothing else until the resource is acquired.
+Mostly used in ISRs, and more secure and efficient.
+
+Semaphores can be used in a process context, where sleeping is ok.
+=============================================================================
+
+
+
+Deadlock example :-
+The simplest example of such a problem is as follows.
+
+Imagine some shared resource R, which, for whatever reason, is guarded by two locks, L1 and L2, which must both be held when R is accessed.
+
+Suppose a thread acquires L1, then L2, and proceeds to access R. The implication of this is that all threads in the program must acquire the two locks in the order first L1 then L2. Not doing so risks deadlock.
+
+The deadlock could happen if two threads -- call them T1 and T2 -- both want to access R. Suppose T1 acquires L1 first, and T2 acquires L2 first. Then T1 tries to acquire L2, and T2 tries to acquire L1, but those locks are both already held. So T1 and T2 become deadlocked."
+
+
+
+============================================================================================================
+
+
+a) semaphore is basically a synchronization primitive but mutex is a locking primitive
+b) a semaphore can be a mutex but a mutex cannot be a semaphore
+c) semaphore can be signalled by any of the thread by using sem_post() but a mutex can be unlocked only by the thread which owns it.
+
+d) semaphores can be used  between threads of different processes but mutex work between threads of the same process or between related process.
+e) semaphores are system wide and remain in the form of files on the filesystem until cleaned but mutexes are process-wide.
+
+Spinlocks are locks used in the kernel code where we know the code fragment which acquires and releases the lock is deterministic.
+They continuously poll to know the status of the lock. Busy sleep.
+
+============================================================================================================
+ Mutexes
+
+Mutexes are sometimes referred to as binary sempahores. That means that mutexes are like semaphores that allow only one thread in its critical section. Indeed, mutexes in HelenOS are implemented exactly in this way: they are built on top of semaphores. From another point of view, they can be viewed as spinlocks without busy waiting. Their semaphore heritage provides good basics for both conditional operation and operation with timeout. The locking operation is called mutex_lock(), the conditional locking operation is called mutex_trylock() and the unlocking operation is called mutex_unlock().
+
+============================================================================================================
+
+Mutex vs. Semaphore, what is the difference?
+The Toilet Example  
+
+Mutex:
+Is a key to a toilet. One person can have the key - occupy the toilet - at the time. When finished, the person gives (frees) the key to the next person in the queue.
+
+Officially: "Mutexes are typically used to serialise access to a section of  re-entrant code that cannot be executed concurrently by more than one thread. A mutex object only allows one thread into a controlled section, forcing other threads which attempt to gain access to that section to wait until the first thread has exited from that section."
+Ref: Symbian Developer Library
+
+(A mutex is really a semaphore with value 1.)
+
+Semaphore:
+Is the number of free identical toilet keys. Example, say we have four toilets with identical locks and keys. The semaphore count - the count of keys - is set to 4 at beginning (all four toilets are free), then the count value is decremented as people are coming in. If all toilets are full, ie. there are no free keys left, the semaphore count is 0. Now, when eq. one person leaves the toilet, semaphore is increased to 1 (one free key), and given to the next person in the queue.
+
+Officially: "A semaphore restricts the number of simultaneous users of a shared resource up to a maximum number.
+Threads can request access to the resource (decrementing the semaphore), and can signal that they have finished using the resource (incrementing the semaphore)."
+Ref: Symbian Developer Library
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

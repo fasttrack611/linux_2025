@@ -1,0 +1,128 @@
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/device.h>
+#include <linux/kernel.h>
+#include <linux/gpio.h>
+
+#define GPIO_PIN 18 // GPIO pin number
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Your Name");
+MODULE_DESCRIPTION("A simple GPIO driver");
+
+static dev_t dev_num;
+static struct class *dev_class;
+static struct device *dev;
+
+static int gpio_open(struct inode *inode, struct file *file)
+{
+    return 0;
+}
+
+static int gpio_release(struct inode *inode, struct file *file)
+{
+    return 0;
+}
+
+static ssize_t gpio_read(struct file *file, char __user *buf, size_t count, loff_t *offset)
+{
+    unsigned char value = gpio_get_value(GPIO_PIN);
+    copy_to_user(buf, &value, 1);
+    return 1;
+}
+
+static ssize_t gpio_write(struct file *file, const char __user *buf, size_t count, loff_t *offset)
+{
+    unsigned char value;
+    copy_from_user(&value, buf, 1);
+    gpio_set_value(GPIO_PIN, value);
+    return 1;
+}
+
+static struct file_operations gpio_fops = {
+    .owner = THIS_MODULE,
+    .open = gpio_open,
+    .release = gpio_release,
+    .read = gpio_read,
+    .write = gpio_write,
+};
+
+static int __init gpio_init(void)
+{
+    int err;
+
+    // Request GPIO pin
+    if (!gpio_is_valid(GPIO_PIN))
+    {
+        printk(KERN_ERR "Invalid GPIO pin number.\n");
+        return -EINVAL;
+    }
+
+    err = gpio_request(GPIO_PIN, "GPIO Driver");
+    if (err)
+    {
+        printk(KERN_ERR "Failed to request GPIO pin.\n");
+        return err;
+    }
+
+    // Set GPIO pin direction
+    err = gpio_direction_output(GPIO_PIN, 0);
+    if (err)
+    {
+        gpio_free(GPIO_PIN);
+        printk(KERN_ERR "Failed to set GPIO pin direction.\n");
+        return err;
+    }
+
+    // Allocate device number
+    err = alloc_chrdev_region(&dev_num, 0, 1, "gpio_dev");
+    if (err)
+    {
+        gpio_free(GPIO_PIN);
+        printk(KERN_ERR "Failed to allocate device number.\n");
+        return err;
+    }
+
+    // Create device class
+    dev_class = class_create(THIS_MODULE, "gpio_class");
+    if (IS_ERR(dev_class))
+    {
+        unregister_chrdev_region(dev_num, 1);
+        gpio_free(GPIO_PIN);
+        printk(KERN_ERR "Failed to create device class.\n");
+        return PTR_ERR(dev_class);
+    }
+
+    // Create device
+    dev = device_create(dev_class, NULL, dev_num, NULL, "gpio_dev");
+    if (IS_ERR(dev))
+    {
+        class_destroy(dev_class);
+        unregister_chrdev_region(dev_num, 1);
+        gpio_free(GPIO_PIN);
+        printk(KERN_ERR "Failed to create device.\n");
+        return PTR_ERR(dev);
+    }
+
+    // Register device
+    cdev_init(&cdev, &gpio_fops);
+    err = cdev_add(&cdev, dev_num, 1);
+    if (err)
+    {
+        device_destroy(dev_class, dev_num);
+        class_destroy(dev_class);
+        unregister_chrdev_region(dev_num, 1);
+        gpio_free(GPIO_PIN);
+        printk(KERN_ERR "Failed to register device.\n");
+        return err;
+    }
+
+    printk(KERN_INFO "GPIO driver initialized.\n");
+
+    return 0;
+}
+
+static void __exit gpio_exit(void)
+{
+    cdev_del(&cdev

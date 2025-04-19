@@ -1,0 +1,53 @@
+
+
+Youtiube Link N/w DD 
+ https://www.youtube.com/watch?v=aq0TLYXGQCA 
+
+
+=========================================================================================================
+
+netif_start_queue is a function in the Linux kernel's networking subsystem 
+that is used to start transmission of network packets from a network interface. 
+When a network packet is queued for transmission on a network interface,
+it is not immediately sent out, but rather added to a transmit queue for the interface. T
+he netif_start_queue function is used to signal to the networking stack that the transmit queue for a network interface is ready to send packets.
+
+Specifically, when netif_start_queue is called, it sets a flag in the net_device structure for the interface that indicates the transmit queue is ready to send packets.
+ This allows the networking stack to begin dequeuing packets from the transmit queue and sending them out through the interface.
+
+netif_start_queue is typically called by network device drivers after 
+they have added a packet to the transmit queue for their interface and 
+the interface is now able to transmit packets.
+Note that netif_start_queue does not actually transmit any packets itself, 
+but merely signals to the networking stack that the interface is ready to transmit.
+
+=============================================================================================================
+
+skb_dequeue is a function used in the Linux kernel networking stack to remove a socket buffer (skb) from a queue.
+
+The function is typically used when processing incoming packets or sending outgoing packets. When a packet is received or sent, 
+it is first queued in the corresponding socket buffer queue. 
+
+skb_dequeue is used to remove the skb from the queue when it is time to process the packet.
+
+The function takes a pointer to a queue head, which represents the head of the socket buffer queue.
+It removes the skb from the queue and returns a pointer to it. 
+If the queue is empty, the function returns NULL.
+
+
+===========================================================================================================
+ip_hdr
+
+netif_stop_queue
+netif_wake_queue
+snull_hw_tx
+netif_tx_disable
+skb = dev_alloc_skb(pkt->datalen + 2);
+skb_put(skb, pkt->datalen)
+
+    priv = netdev_priv(dev);
+
+snull_rx_ints(dev, 0);  /* Disable further interrupts */
+ netif_rx_schedule(dev);
+skb = dev_alloc_skb(pkt->datalen + 2);
+netif_receive_skb(skb);

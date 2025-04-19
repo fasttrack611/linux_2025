@@ -1,0 +1,109 @@
+ 	  dev_name(adev->dev),
+	  dma_has_cap(DMA_PQ, adev->common.cap_mask) ? "pq " : "",
+	  dma_has_cap(DMA_PQ_VAL, adev->common.cap_mask) ? "pq_val " : "",
+	  dma_has_cap(DMA_XOR, adev->common.cap_mask) ? "xor " : "",
+	  dma_has_cap(DMA_XOR_VAL, adev->common.cap_mask) ? "xor_val " : "",
+	  dma_has_cap(DMA_MEMCPY, adev->common.cap_mask) ? "memcpy " : "",
+	  dma_has_cap(DMA_INTERRUPT, adev->common.cap_mask) ? "intr " : "");
+
+==============================================================================
+dma_cap_zero(mask);
+	dma_cap_set(DMA_MEMCPY, mask);
+
+	if (cdns_ctrl->caps1->has_dma) {
+		cdns_ctrl->dmac = dma_request_channel(mask, NULL, NULL);
+		if (!cdns_ctrl->dmac) {
+			dev_err(cdns_ctrl->dev,
+				"Unable to get a DMA channel\n");
+			ret = -EBUSY;
+			goto disable_irq;
+		}
+	}
+======================================================================================
+
+dma_cap_mask_t mask;
+	dma_cap_zero(mask);
+	dma_cap_set(DMA_SLAVE, mask);
+
+	io->chan = dma_request_channel(mask, shdma_chan_filter,
+				       (void *)io->dma_id);
+
+	ret = dmaengine_slave_config(io->chan, &cfg);
+		if (ret < 0) {
+			dma_release_channel(io->chan);
+			io->chan = NULL;
+		}
+
+
+=====================================================================
+
+
+	dma_cap_zero(mask);
+	dma_cap_set(DMA_SLAVE, mask);
+	dma_cap_set(DMA_PRIVATE, mask);
+
+	sg_init_table(&tx_ctl->sg, 1);
+
+
+	tx_ctl->chan = dma_request_channel(mask, ks8842_dma_filter_fn,
+					   (void *)(long)tx_ctl->channel);
+	if (!tx_ctl->chan) {
+		err = -ENODEV;
+		goto err;
+	}
+
+	/* allocate DMA buffer */
+	tx_ctl->buf = kmalloc(DMA_BUFFER_SIZE, GFP_KERNEL);
+	if (!tx_ctl->buf) {
+		err = -ENOMEM;
+		goto err;
+	}
+
+
+	sg_dma_address(&tx_ctl->sg) = dma_map_single(adapter->dev,
+		tx_ctl->buf, DMA_BUFFER_SIZE, DMA_TO_DEVICE);
+	if (dma_mapping_error(adapter->dev, sg_dma_address(&tx_ctl->sg))) {
+		err = -ENOMEM;
+		sg_dma_address(&tx_ctl->sg) = 0;
+		goto err;
+	
+
+=============================================================================
+C:\Users\aleemulx\Downloads\linux-6.2.10.tar\linux-6.2.10\drivers\i2c\busses\i2c-imx.c
+
+https://www.youtube.com/watch?v=_HvxP0TSxNg
+
+
+	dma->dma_buf = dma_map_single(chan_dev, msgs->buf,
+					dma->dma_len, dma->dma_data_dir);
+	if (dma_mapping_error(chan_dev, dma->dma_buf)) {
+		dev_err(dev, "DMA mapping failed\n");
+		goto err_map;
+	}
+
+	txdesc = dmaengine_prep_slave_single(dma->chan_using, dma->dma_buf,
+					dma->dma_len, dma->dma_transfer_dir,
+					DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+	if (!txdesc) {
+		dev_err(dev, "Not able to get desc for DMA xfer\n");
+		goto err_desc;
+
+	reinit_completion(&dma->cmd_complete);
+	txdesc->callback = i2c_imx_dma_callback;
+	txdesc->callback_param = i2c_imx;
+	if (dma_submit_error(dmaengine_submit(txdesc))) {
+		dev_err(dev, "DMA submit failed\n");
+		goto err_submit;
+	}
+
+	dma_async_issue_pending(dma->chan_using);
+
+	dma_async_issue_pending(dma->chan_using);
+==================================================================
+
+1) Allocate a Buffer with kmalloc  Cache Contiguous Memory 
+2) Cause Buffer to be ready to use by the DMA Including any Cache Operatios required. 
+3) Create a discriptor for DMA Transcation
+4) Setup the callback function for the descroptor 
+5) Queue the Descriptor in the DMA Engine
+========================================================================================
