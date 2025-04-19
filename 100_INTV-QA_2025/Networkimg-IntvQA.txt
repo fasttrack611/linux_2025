@@ -1,0 +1,15 @@
+VPN? 
+
+<< Lan >>>
+IP 
+Switch 
+SUBNET
+================
+WAN 
+WiFi 802.11 ( IEEE 802.11) Architecture
+Fiewal 
+DMZ 
+Port fWD 
+NAT
+
+

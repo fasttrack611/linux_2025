@@ -1,0 +1,514 @@
+
+What is the difference between a microcontroller and a microprocessor?
+What is the difference between RAM and ROM?
+What is an interrupt?
+What is a watchdog timer?
+
+What is a linker?
+What is an assembler?
+What is a cross-compiler?
+What is the difference between big-endian and little-endian byte ordering?
+What is an RTOS?
+What is a semaphore?
+What is a mutex?
+What is a critical section?
+What is a race condition?
+What is a deadlock?
+What is a priority inversion?
+What is a task scheduler?
+What is a context switch?
+What is the stack and heap in an embedded system?
+What is DMA?
+What is a GPIO?
+What is an ADC?
+What is a DAC?
+What is PWM?
+What is a timer?
+What is a watchdog timer?
+What is an I2C bus?  What is a SPI bus?
+What is a CAN bus?
+What is a UART?
+What is an interrupt service routine?
+What is a vector table?
+What is a linker script?
+What is an ELF file?
+
+What is a SWD interface?
+What is a memory-mapped I/O?
+
+====================================================================================================
+### How Does the Bootloader Pass Arguments to the Kernel?
+
+- **Command Line Arguments**: The bootloader passes kernel parameters via a command line string.
+- **Configuration Files**: Bootloaders like GRUB use configuration files (e.g., `grub.cfg`) to specify the kernel command line.
+- **Memory Location**: The bootloader places the command line string in a predefined memory location or passes a pointer to the string in a CPU register.
+- **Device Tree (ARM)**: On ARM systems, the bootloader uses the Device Tree Blob (DTB) to pass configuration data, including the `bootargs` property [1](https://stackoverflow.com/questions/64877292/how-does-the-bootloader-pass-the-kernel-command-line-to-the-kernel) [2](https://stackoverflow.com/questions/1016681/arguments-to-kernel) [3](https://unix.stackexchange.com/questions/274279/how-does-a-bootloader-actually-hand-off-to-a-kernel) [4](https://wiki.archlinux.org/title/Kernel_parameters).
+
+
+### What is an AHB Bus?
+
+- **Definition**: The Advanced High-Performance Bus (AHB) is part of the ARM Advanced Microcontroller Bus Architecture (AMBA).
+- **Purpose**: Provides high-performance, low-latency data transfer between components in a System on Chip (SoC).
+- **Features**:
+  - **Burst Transfers**: Efficiently transfers blocks of data.
+  - **Pipelining**: Allows overlapping of operations to improve performance.
+  - **Split Transactions**: Enables handling of multiple transactions simultaneously.
+- **Components**: Connects processors, memory controllers, and peripheral devices 
+
+[5](https://en.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture) [6](https://www.allaboutcircuits.com/technical-articles/introduction-to-the-advanced-microcontroller-bus-architecture/) [7](https://community.st.com/t5/stm32-mcus-products/what-s-the-difference-between-ahb-ahb1-and-ahb2/td-p/625204).
+
+If you need more detailed information or have further questions, feel free to ask!
+================================================================================================
+What is an APB bus?
+
+
+The APB (Advanced Peripheral Bus) is another widely used bus protocol in SoC (System on Chip) design.
+ It is a low-speed bus that is used to connect peripheral devices, such as timers, interrupt controllers, 
+ and other low-speed peripherals, to the main system bus, such as AHB or AXI (Advanced eXtensible Interface).
+
+The APB bus is designed to be simple and easy to implement, 
+with a low gate count, making it an ideal choice for connecting low-speed peripherals 
+that do not require high-performance data transfer. 
+It is also designed to support multiple bus masters, 
+allowing multiple devices to share the bus and access the peripheral devices.
+
+The APB protocol includes features such as single transfers, pipelining,
+and split transactions that enable efficient data transfer between the
+various components connected to the bus. It also includes support for 
+various types of peripheral access, such as read and write operations,
+as well as block transfers.
+
+
+
+=================================================================================================================
+What is ARM architecture?
+What is ARM Cortex-M series?  What is ARM Cortex-A series?  What is ARM Cortex-R series?
+
+ARM Cortex-M, Cortex-A, and Cortex-R are different series of microprocessors designed by ARM Holdings, a British semiconductor company.
+
+The ARM Cortex-M series is a family of microcontrollers that are used in a wide range of embedded applications. These microcontrollers are designed to be efficient and low-power, making them ideal for use in small, battery-powered devices. The Cortex-M series is known for its ease of use, low cost, and high performance. It is commonly used in applications such as automotive, medical, and consumer electronics.
+
+The ARM Cortex-A series is a family of microprocessors designed for use in high-performance computing applications. These microprocessors are used in a range of devices, including smartphones, tablets, and other mobile devices. They are designed to deliver high performance while consuming minimal power. The Cortex-A series is known for its advanced features, such as out-of-order execution, hardware virtualization support, and multiple cores.
+
+The ARM Cortex-R series is a family of microprocessors designed for real-time applications. These microprocessors are used in safety-critical applications such as automotive, industrial control, and aerospace. The Cortex-R series is known for its high performance, reliability, and safety features. It includes features such as error-correcting code (ECC) memory, hardware-based fault detection and handling, and tightly-coupled memory (TCM) for faster access to critical code and data.
+
+
+
+
+
+
+
+
+=================================================================================================================
+What is ARMv6-M architecture?   What is ARMv7-M architecture?   What is ARMv8-M architecture?
+
+ARMv6-M, ARMv7-M, and ARMv8-M are three different versions of the ARM architecture designed 
+for use in microcontroller-based embedded systems.
+
+ARMv6-M is the oldest of the three and was introduced in 2004.
+ It is a 32-bit architecture with a simple instruction set and is optimized for low-power,
+ low-cost microcontrollers. It includes features such as a two-stage pipeline, 
+ a reduced instruction set, and a limited set of system resources.
+
+ARMv7-M is a newer version of the architecture and was introduced in 2009.
+ It includes a more advanced instruction set, a three-stage pipeline, 
+ and improved system resources compared to ARMv6-M. ARMv7-M also
+ adds support for hardware floating-point operations and other advanced features.
+
+ARMv8-M is the latest version of the architecture and was introduced in 2013.
+ It includes a number of significant improvements over the previous versions,
+ including a 32-bit instruction set, a six-stage pipeline,
+ and support for the ARMv8-M Security Extension, 
+ which provides additional security features for microcontroller-based systems.
+ ARMv8-M also adds support for hardware-based TrustZone technology, 
+ which provides hardware-enforced isolation between secure and non-secure code and data.
+
+In summary, ARMv6-M, ARMv7-M, and ARMv8-M are three different versions
+ of the ARM architecture that are designed for use in microcontroller-based embedded systems.
+ Each version includes different features and capabilities, 
+with newer versions providing improved performance, 
+more advanced instruction sets, and additional security features.
+
+
+=================================================================================================================
+
+What is ARMv7-A architecture?  What is ARMv8-A architecture?
+
+ARMv7-A and ARMv8-A are two different versions of the ARM architecture designed 
+for use in application processors and high-performance computing systems.
+
+ARMv7-A was introduced in 2005 and is a 32-bit architecture that includes 
+a wide range of features and capabilities optimized for high-performance computing. 
+It includes features such as a seven-stage pipeline, support for up to four cores,
+ and a large set of system resources.
+ ARMv7-A also includes support for hardware virtualization,
+ which allows multiple operating systems to run on a single processor.
+
+ARMv8-A is the latest version of the architecture and was introduced in 2011.
+ It is a 64-bit architecture that includes a number of significant 
+ improvements over the previous version, including a larger address space, 
+ improved performance, and enhanced security features.
+ ARMv8-A also includes support for hardware virtualization, 
+ as well as features such as a new instruction set architecture
+ (AArch64) that improves performance and reduces code size.
+
+One of the most significant features of ARMv8-A is the addition of the ARMv8-A Security Extension,
+ which provides hardware-enforced security features such as TrustZone,
+ which creates secure and non-secure zones on a processor, 
+ and Crypto Extension, which provides hardware acceleration for cryptographic operations.
+
+In summary, ARMv7-A is a 32-bit architecture optimized for high-performance computing,
+while ARMv8-A is a 64-bit architecture that includes significant improvements 
+in performance and security features. 
+Both architectures include support for hardware virtualization and a range of system resources,
+with ARMv8-A providing additional enhancements to support modern computing needs.
+
+=====================================================================================================
+What is the difference between ARM Cortex-M0 and ARM Cortex-M4?
+
+=====================================================================================================
+What is the difference between ARM Cortex-M4 and ARM Cortex-M7?
+
+The ARM Cortex-M4 and Cortex-M7 are two different processor cores within the Cortex-M family
+of microcontrollers designed for use in embedded systems. Both processor cores are designed to be efficient, 
+low-power, and cost-effective, making them suitable for a wide range of applications, 
+from consumer electronics to industrial control systems.
+
+The Cortex-M7 is a more advanced processor core compared to the Cortex-M4 and was introduced in 2014, 
+several years after the Cortex-M4 was released. The Cortex-M7 features a number of improvements over the Cortex-M4,
+including a higher clock speed, larger instruction and data caches, 
+and additional hardware features that improve performance and efficiency.
+
+One of the most significant differences between the Cortex-M4 and Cortex-M7 is their clock speed. 
+The Cortex-M7 has a maximum clock speed of 600 MHz, while the Cortex-M4 has a maximum clock speed of 180 MHz. 
+This increased clock speed allows the Cortex-M7 to process more instructions per second, improving overall performance.
+
+The Cortex-M7 also features larger instruction and data caches, 
+with a 16 KB L1 instruction cache and a 16 KB L1 data cache, 
+compared to the 1 KB L1 instruction cache and 1 KB L1 data cache of the Cortex-M4.
+The larger caches of the Cortex-M7 allow it to store more frequently used data and instructions, 
+reducing the need to fetch data from main memory, which can improve performance.
+
+Additionally, the Cortex-M7 features a new instruction set called the ARMv7-M architecture, 
+which includes new instructions and features that improve performance and support for real-time operating systems.
+
+In summary, the Cortex-M7 is a more advanced processor core compared to the Cortex-M4,
+with a higher clock speed, larger instruction and data caches,
+and additional hardware features that improve performance and efficiency.
+These improvements make the Cortex-M7 better suited for demanding real-time and compute-intensive applications.
+
+=====================================================================================================
+
+What is the difference between ARM Cortex-R5 and ARM Cortex-R8?
+
+The ARM Cortex-R5 and Cortex-R8 are two different processor cores within the Cortex-R family 
+of real-time processors designed for use in safety-critical and real-time systems. 
+The Cortex-R family is optimized for deterministic performance and high reliability,
+making it ideal for use in applications such as automotive systems, industrial control, and aerospace systems.
+
+The Cortex-R8 is a more advanced processor core compared to the Cortex-R5 and was introduced in 2015,
+several years after the Cortex-R5 was released. The Cortex-R8 features a number of improvements over the Cortex-R5, 
+including a higher clock speed, larger instruction and data caches, 
+and additional hardware features that improve performance and efficiency.
+
+One of the most significant differences between the Cortex-R5 and Cortex-R8 is their clock speed. 
+The Cortex-R8 has a maximum clock speed of 1.5 GHz, while the Cortex-R5 has a maximum clock speed of 1.0 GHz. 
+This increased clock speed allows the Cortex-R8 to process more instructions per second, improving overall performance.
+
+The Cortex-R8 also features larger instruction and data caches,
+with a 64 KB L1 instruction cache and a 64 KB L1 data cache, 
+compared to the 16 KB L1 instruction cache and 16 KB L1 data cache of the Cortex-R5.
+The larger caches of the Cortex-R8 allow it to store more frequently used data and instructions, 
+reducing the need to fetch data from main memory, which can improve performance.
+
+Additionally, the Cortex-R8 features a new instruction set called the ARMv7-R architecture,
+ which includes new instructions and features that improve performance and support for real-time operating systems.
+
+In summary, the Cortex-R8 is a more advanced processor core compared to the Cortex-R5,
+ with a higher clock speed, larger instruction and data caches, 
+ and additional hardware features that improve performance and efficiency. 
+ These improvements make the Cortex-R8 better suited for demanding real-time and safety-critical applications.
+
+=====================================================================================================
+What is ARM Thumb instruction set? What is ARM Thumb-2 instruction set?
+
+ARM Thumb and Thumb-2 are two instruction sets used by ARM processors to 
+reduce code size and improve performance in embedded systems, mobile devices, and other applications.
+
+The ARM Thumb instruction set is a 16-bit instruction set that is a subset of the 32-bit ARM instruction set.
+Thumb instructions are smaller than ARM instructions, 
+allowing for more efficient use of memory and code size reduction. 
+However, because of their smaller size, Thumb instructions may not be as powerful as ARM instructions,
+and some complex instructions may not be available in Thumb mode.
+
+To address this limitation, ARM introduced the Thumb-2 instruction set, 
+which is a hybrid instruction set that includes both 16-bit Thumb instructions and 32-bit ARM instructions.
+Thumb-2 extends the Thumb instruction set with new instructions that are similar in
+power and functionality to ARM instructions. 
+This allows Thumb-2 code to be denser and more powerful than Thumb code,
+ while still being more efficient in terms of code size than pure ARM code.
+
+The Thumb-2 instruction set is backward compatible with Thumb code, 
+so it can execute both Thumb and Thumb-2 instructions.
+ This allows for a smooth transition from older Thumb code to newer Thumb-2 code,
+ and provides greater flexibility in optimizing code for different performance and memory requirements.
+
+In summary, ARM Thumb is a 16-bit instruction set that reduces code size,
+and ARM Thumb-2 is a hybrid instruction set that includes both 
+16-bit Thumb instructions and 32-bit ARM instructions, providing a balance between code size and performance.
+
+=====================================================================================================
+What is the ARM instruction pipeline?
+What is pipelining in a CPU?
+What is a pipeline stall?
+=====================================================================================================
+What is an exception?  What is a fault? What is a trap?
+
+In computer science and programming, an exception, fault, 
+and trap are all mechanisms used to handle errors or exceptional
+ conditions that may occur during program execution.
+
+Exception: An exception is an event that occurs during the execution 
+of a program that disrupts the normal flow of instructions. 
+Exceptions can be caused by various reasons, such as invalid user input, 
+hardware errors, or software bugs. 
+When an exception occurs, the program stops executing and the 
+operating system or runtime environment takes over to handle the exception.
+
+Fault: A fault is a hardware or software defect that causes a failure in the system. 
+It is a condition that occurs when the hardware or 
+software deviates from its specified behavior. 
+Faults can lead to errors or exceptions, 
+which can in turn cause system failures or crashes.
+
+Trap: A trap is a mechanism used by operating systems to y
+handle exceptions or faults. When an exception or fault occurs, 
+the operating system interrupts the normal execution of the 
+program and transfers control to a predefined location called a trap handler.
+ The trap handler then handles the exception or fault and returns control back to the program.
+
+In summary, an exception is an event that occurs during program execution,
+a fault is a defect in hardware or software that can lead to errors or exceptions, 
+and a trap is a mechanism used to handle exceptions or faults
+ by interrupting the normal execution of the program and 
+ transferring control to a predefined location for handling.
+
+=====================================================================================================
+What is an data abort? Prefetch abort in arm With register to chcek ? 
+
+In ARM architecture, a data abort and a prefetch abort are exceptions that
+ occur when the processor encounters an error while accessing memory. Here's a brief explanation of each:
+
+Data abort: A data abort occurs when the processor tries to access an 
+invalid or inaccessible memory location. This can happen for a variety of reasons,
+such as accessing a virtual memory address that has not been mapped to physical memory,
+accessing an area of memory that is protected or reserved,
+or accessing a memory location that has been corrupted. 
+When a data abort occurs, the processor saves the current state of the program 
+and transfers control to an exception handler to handle the exception.
+To check which address caused the data abort, 
+you can use the Data Fault Address Register (DFAR) in ARM processors.
+This register contains the virtual memory address that caused the data abort,
+which can help in identifying the cause of the exception.
+
+Prefetch abort: A prefetch abort occurs when the processor tries to 
+fetch instructions from an invalid memory location. This can happen 
+when the program tries to execute instructions that have not been 
+loaded into memory yet, or when the instruction cache contains invalid data. 
+When a prefetch abort occurs, the processor saves the current state of the 
+program and transfers control to an exception handler to handle the exception.
+To check which address caused the prefetch abort, 
+you can use the Instruction Fault Address Register (IFAR) in ARM processors.
+ This register contains the virtual memory address that caused the prefetch abort, 
+ which can help in identifying the cause of the exception.
+
+In summary, data aborts and prefetch aborts are exceptions that occur 
+when the processor encounters errors while accessing memory. 
+To check which address caused the exception, you can use the 
+Data Fault Address Register (DFAR) for data aborts and the
+Instruction Fault Address Register (IFAR) for prefetch aborts.
+
+=====================================================================================================
+What is a privileged mode?  What is an unprivileged mode?
+
+Privileged mode and unprivileged mode are two distinct modes of operation in a computer system.
+
+In privileged mode, also known as kernel mode, the processor has access to all 
+system resources and can execute any instruction in the instruction set. 
+This mode is typically reserved for the operating system kernel and other critical system services, 
+as they require direct access to hardware and other low-level system resources.
+
+In contrast, unprivileged mode, also known as user mode, restricts the processor's 
+access to system resources and enforces protection mechanisms that prevent user-level 
+code from directly accessing certain hardware resources and executing certain privileged instructions.
+ This mode is used by user-level applications, which run in a more restricted environment
+ to protect the system from unintended or malicious behavior.
+
+By enforcing a separation between privileged and unprivileged modes, 
+modern computer systems are able to provide a secure and stable computing environment,
+ where critical system resources are protected from unauthorized access 
+ and user applications can run without interfering with each other or the system as a whole.
+=====================================================================================================
+What is ARM TrustZone?   What is ARM Neon?
+
+ARM TrustZone and ARM Neon are two distinct features of 
+ARM-based processors used in many mobile devices, embedded systems, and other applications.
+
+ARM TrustZone is a security technology that creates a secure environment
+ within the processor, allowing for the isolation and protection of
+ critical system resources and sensitive data. It provides a 
+ secure and trusted execution environment (TEE) 
+ that is isolated from the rest of the system, 
+ allowing for the implementation of secure boot,
+ secure storage, and other security features.
+ TrustZone is designed to provide a hardware-enforced 
+ separation between secure and non-secure software, 
+ making it more difficult for attackers to compromise the security of the system.
+
+ARM Neon, on the other hand, is a set of SIMD (Single Instruction Multiple Data)
+instructions that can perform parallel operations on multiple data elements at once,
+allowing for faster processing of multimedia, graphics,
+and other data-intensive applications. 
+Neon is an optional feature of ARM processors and is widely used
+in mobile devices for tasks such as video decoding, image processing, and gaming.
+
+In summary, ARM TrustZone provides a hardware-based security 
+mechanism to protect the system, while ARM Neon provides a 
+performance enhancement mechanism for certain types of computations.
+
+
+=====================================================================================================
+What is ARM Thumb-2EE?
+
+=====================================================================================================
+What is ARMv7VE architecture?
+
+What is the ARMv8-R architecture?
+=====================================================================================================
+What is the ARMv8.1-A architecture?
+=====================================================================================================
+What is the ARMv8.2-A architecture?
+=====================================================================================================
+What is the ARMv8.3-A architecture?
+=====================================================================================================
+What is the ARMv8.4-A architecture?
+
+What is the ARMv8.5-A architecture?
+
+=====================================================================================================
+What is the ARMv8.6-A architecture?
+
+The ARMv8.6-A architecture is the latest version of the ARM architecture. 
+It was announced by ARM in March 2020 and is an evolution of the ARMv8-A architecture.
+ ARMv8.6-A introduces new features to improve performance, security, 
+ and efficiency in embedded systems, servers, and other applications.
+ Some of the key features of ARMv8.6-A include:
+
+Scalable Vector Extension 2 (SVE2): SVE2 extends the SVE feature introduced in ARMv8.
+2-A and provides enhanced support for vector operations. 
+SVE2 provides a scalable vector length that can be adjusted at runtime,
+ enabling efficient processing of data in different sizes and formats.
+
+Enhanced Matrix Processing Extension (MPE): MPE provides new instructions to accelerate matrix operations,
+ such as matrix multiplication and convolution, commonly used in machine learning and other applications.
+
+Pointer Authentication: ARMv8.6-A introduces a new security feature called Pointer Authentication,
+ which provides protection against memory attacks by ensuring that memory access is authorized and valid.
+
+Advanced Atomic Operations: ARMv8.6-A extends support for atomic operations,
+ enabling more efficient processing of complex data structures 
+ and improving concurrency in multi-threaded environments.
+
+Overall, ARMv8.6-A is designed to provide improved performance, 
+security, and flexibility for a wide range of applications, 
+from embedded systems to high-performance computing.
+============================================================================================================================================
+
+The Nested Vectored Interrupt Controller (NVIC) is a key component in ARM Cortex-M microcontrollers 
+that manages interrupt requests from various sources. 
+It provides a mechanism for handling multiple interrupt requests 
+in a priority-based manner and enables interrupt nesting,
+which allows higher priority interrupts to interrupt the execution of lower priority interrupts.
+
+The NVIC is responsible for receiving and prioritizing interrupt requests
+and dispatching them to the appropriate interrupt handler.
+It maintains a priority level for each interrupt request, 
+and when an interrupt occurs, it compares the priority of 
+the incoming request with the priority of any currently active interrupts. 
+If the new interrupt has a higher priority than any currently active interrupts,
+the NVIC suspends the current execution and executes the higher priority interrupt handler.
+
+The NVIC also provides support for interrupt nesting, which allows a higher 
+priority interrupt to interrupt the execution of a lower priority interrupt handler. 
+This feature enables the system to quickly respond to high-priority events while still 
+servicing lower priority events in a timely manner.
+
+In addition to managing interrupts, the NVIC also provides a mechanism for controlling
+ the clock and power of the microcontroller, allowing the system to enter low-power modes when interrupts are not active.
+
+Overall, the NVIC plays a critical role in managing interrupt requests 
+and ensuring the efficient and effective operation of ARM Cortex-M microcontrollers.
+
+
+===========================================================================================
+
+What is WiFi 6 (802.11ax) and WiFi 6E?
+https://www.youtube.com/watch?v=Y7OWUg_kmK4
+
+
+what is the latest wifi protocal and encription metods ?
+
+The latest Wi-Fi protocol is Wi-Fi 6, also known as 802.11ax. 
+Wi-Fi 6 is designed to provide faster speeds, higher capacity,
+ and better efficiency in congested environments compared to previous Wi-Fi standards.
+ Some of the key features of Wi-Fi 6 include support for higher data rates, 
+ improved multi-user performance, and more efficient use of spectrum.
+
+As for encryption methods, the latest and most secure 
+Wi-Fi encryption method is WPA3 (Wi-Fi Protected Access 3).
+ WPA3 provides stronger encryption and better protection against
+ common attacks compared to its predecessor, WPA2. 
+ WPA3 also introduces new security features such as 
+ Protected Management Frames (PMF) and Simultaneous Authentication 
+ of Equals (SAE) that improve the security of Wi-Fi networks.
+
+In summary, Wi-Fi 6 and WPA3 are the latest and most advanced 
+Wi-Fi protocol and encryption method, respectively, 
+and they offer improved performance and security compared to previous versions.
+
+===========================================================================================
+
+WiFi (Wireless) Password Security - WEP, WPA, WPA2, WPA3, WPS Explained
+
+https://www.youtube.com/watch?v=WZaIfyvERcA
+
+WiFi (Wireless) Password Security protocols are used to protect wireless networks from 
+unauthorized access and keep the network traffic secure.
+Here's an overview of some of the most commonly used WiFi security protocols:
+
+Wired Equivalent Privacy (WEP): WEP was the first security protocol for WiFi networks.
+ It uses a static encryption key to protect wireless traffic. However, WEP has been shown to have several weaknesses, and it can be easily cracked by attackers.
+
+Wi-Fi Protected Access (WPA): WPA was developed as a replacement for WEP. 
+It uses a stronger encryption key and authentication mechanism to protect wireless traffic.
+ WPA can be implemented in two modes: WPA-PSK (Pre-Shared Key) and WPA-Enterprise. 
+ WPA-PSK uses a shared key that is used by all users on the network, 
+ while WPA-Enterprise uses an authentication server to validate each user's credentials.
+
+Wi-Fi Protected Access II (WPA2): WPA2 is an updated version of WPA that provides stronger security. 
+It uses the Advanced Encryption Standard (AES) encryption algorithm 
+and offers better protection against attacks than WEP and WPA.
+
+Wi-Fi Protected Access III (WPA3): WPA3 is the latest security protocol for WiFi networks.
+ It provides stronger protection against password guessing attacks by 
+ using Simultaneous Authentication of Equals (SAE) encryption protocol,
+ which replaces the Pre-Shared Key (PSK) method used in WPA2.
+
+When choosing a WiFi security protocol, it's important to consider the level of security
+ provided and the compatibility with your devices. WPA2 and WPA3 are currently 
+ considered the most secure options and are recommended for use in all WiFi networks.
+
+
+
+
+

@@ -1,0 +1,140 @@
+
+QUESTIONS
+1. What do you understand by thread and give one example in C++?
+
+ANSWER
+0. In every application there is a default thread which is main(), in side this we create other threads.
+1. A thread is also known as lightweight process. Idea is achieve parallelism by dividing a process into multiple threads. 
+   For example:
+   (a) The browser has multiple tabs that can be different threads. 
+   (b) MS Word must be using multiple threads, one thread to format the text, another thread to process inputs (spell checker)
+   (c) Visual Studio code editor would be using threading for auto completing the code. (Intellicence)
+
+WAYS TO CREATE THREADS IN C++11
+1. Function Pointers
+2. Lambda Functions
+3. Functors
+4. Member Functions
+5. Static Member functions
+------------------------------------
+
+Five different types for creating threads.
+1. Function Pointer -- this is the very basic form of creating threads.
+2. Lambda Function
+3. Functor (Function Object)
+4. Non-static member function
+5. Static member function
+
+There are more than listed ways to create threads but for now we will learn this muc
+--------------
+JOIN NOTES
+0. Once a thread is started we wait for this thread to finish by calling join() function on thread object.
+1. Double join will result into program termination.
+2. If needed we should check thread is joinable before joining. ( using joinable() function)
+
+DETACH NOTES
+0. This is used to detach newly created thread from the parent thread.
+1. Always check before detaching a thread that it is joinable otherwise we may end up double detaching and 
+   double detach() will result into program termination.
+2. If we have detached thread and main function is returning then the detached thread execution is suspended.
+
+NOTES:
+Either join() or detach() should be called on thread object, otherwise during thread object�s destructor it will 
+terminate the program. Because inside destructor it checks if thread is still joinable? if yes then it terminates the program.
+
+
+================================================================================================================================
+
+In this video we will learn about Mutex In C++ Threading | Why Use Mutex | What Is Race Condition And How To Solve It? | What Is Critical Section
+
+Mutex: Mutual Exclusion
+
+RACE CONDITION:
+0. Race condition is a situation where two or more threads/process happens to change a common data at the same time.
+1. If there is a race condition then we have to protect it and the protected section is  called critical section/region.
+
+MUTEX:
+0. Mutex is used to avoid race condition.
+1. We use lock() , unlock() on mutex to avoid race condition.
+
+
+========================================================================================================================
+Mutex Try Lock
+
+In this video we will learn about std::mutex::try_lock() On Mutex In C++11 Threading.
+Few points to remember about the try_lock is as follows:
+0. try_lock() Tries to lock the mutex. Returns immediately. On successful lock acquisition returns true otherwise returns false.
+1. If try_lock() is not able to lock mutex, then it doesn't get blocked that's why it is called non-blocking.
+2. If try_lock is called again by the same thread which owns the mutex, the behaviour is undefined.
+   It is a dead lock situation with undefined behaviour. (if you want to be able to lock the same mutex by same thread more than one time the go for recursive_mutex)
+
+There are so many try_lock function
+1. std::try_lock
+2. std::mutex::try_lock
+3. std::shared_lock::try_lock
+4. std::timed_mutex::try_lock
+5. std::unique_lock::try_lock
+6. std::shared_mutex::try_lock
+7. std::recursive_mutex::try_lock
+8. std::shared_timed_mutex::try_lock
+9. std::recursive_timed_mutex::try_lock
+------------------------------
+
+
+In this video we will learn about "Timed Mutex In C++ Threading (std::timed_mutex)"
+We have learned Mutex, Race Condition, Critical Section in previous videos.
+And few points to remember about timed mutex is as follows:
+0. std::timed_mutex is blocked till timeout_time or the lock is acquired and returns true if success 
+   otherwise false.
+1. Member Function:
+   a. lock 
+   b. try_lock
+   c. try_lock_for    ---\ These two functions makes it different from mutex.
+   d. try_lock_until  ---/ 
+   e. unlock
+
+EXAMPLE: try_lock_for();
+Waits until specified timeout_duration has elapsed or the lock is acquired, whichever comes first.
+On successful lock acquisition returns true, otherwise returns false.
+===========================================================================
+
+Recursive Mutex In C++ Threading
+
+
+Few points to remember about recursive mutex is as follows:
+0. It is same as mutex but, Same thread can lock one mutex multiple times using recursive_mutex.
+1. If thread T1 first call lock/try_lock on recursive mutex m1, then m1 is locked by T1, now 
+   as T1 is running in recursion T1 can call lock/try_lock any number of times there is no issue.
+2. But if T1 have acquired 10 times lock/try_lock on mutex m1 then thread T1 will have to unlock
+   it 10 times otherwise no other thread will be able to lock mutex m1.
+   It means recursive_mutex keeps count how many times it was locked so that many times it should be unlocked.
+3. How many time we can lock recursive_mutex is not defined but when that number reaches and if we were calling
+   lock() it will return std::system_error OR if we were calling try_lock() then it will return false.
+
+BOTTOM LINE:
+0. It is similar to mutex but have extra facility that it can be locked multiple time by same thread.
+1. If we can avoid recursive_mutex then we should because it brings overhead to the system.
+2. It can be used in loops also.
+
+==============================================
+Condition Variable In C++ Threading
+
+
+
+In this video we will learn how to use "Condition Variable In C++ Threading".
+Few important points to remember while using "condition variables" are as follows:
+1. Condition variables allow us to synchronise threads via notifications.
+   a. notify_one();
+   b. notify_all();
+2. You need mutex to use condition variable
+3. Condition variable is used to synchronise two or more threads.
+4. Best use case of condition variable is Producer/Consumer problem.
+5. Condition variables can be used for two purposes:
+    a. Notify other threads
+    b. Wait for some condition
+
+
+============================================================================================
+
+DeadLock With Example In C++
+

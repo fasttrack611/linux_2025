@@ -1,0 +1,363 @@
+
+
+
+When and why do you use threads?
+
+Threads are used in software development when there is a need to execute 
+multiple tasks or processes simultaneously within the same program. 
+A thread is a lightweight unit of execution within a process,
+ and it shares the same memory space as the other threads within the same process.
+
+Threads are useful in a number of scenarios. Here are a few examples:
+
+Concurrency: When there are multiple tasks that need to be executed simultaneously, 
+using threads can improve performance and reduce latency. For example, 
+a web server might use threads to handle multiple incoming requests at the same time.
+
+User Interface Responsiveness: When a program needs to respond to user input quickly, 
+using threads can ensure that the user interface remains responsive even 
+when the program is performing other tasks in the background.
+
+Asynchronous I/O: When a program needs to perform I/O operations that may block for 
+a significant amount of time (such as reading data from a network socket or waiting for user input), 
+using threads can allow the program to continue executing other tasks while waiting for the I/O operation to complete.
+
+Parallelism: When a program needs to perform computationally intensive tasks,
+		using threads can allow the program to take advantage of multiple CPU 
+cores and perform the tasks in parallel, which can significantly improve performance.
+
+It's worth noting that while threads can be a powerful tool for improving performance and responsiveness, 
+they can also introduce additional complexity into a program. Developers need to be careful 
+to manage thread synchronization and avoid issues such as race conditions and deadlocks.
+
+=======================================================================================================================================
+What are the advantages and disadvantages to a thread over a process?
+
+Threads and processes are two different ways of organizing program execution. 
+Here are some advantages and disadvantages of using threads over processes:
+
+Advantages of using threads:
+
+Memory efficiency: Threads share the same memory space as the parent process, 
+		   which can save memory compared to creating a separate process for each task.
+
+Context switching efficiency:  Switching between threads within the same process is generally faster 
+			      than switching between processes, because the operating system does not need to perform as much bookkeeping.
+
+Communication efficiency: Threads within the same process can communicate with each other directly, 
+				without the need for inter-process communication mechanisms such as pipes or sockets.
+Better resource sharing: Threads within the same process can share resources such as files 
+			and network sockets more easily than processes, because they are in the same memory space.
+
+
+Disadvantages of using threads:
+=================================
+Increased complexity: Using threads can add additional complexity to program design, because developers need to be careful to manage thread 			synchronization and avoid issues such as race conditions and deadlocks.
+
+Difficult to isolate failures: If a thread crashes, it can bring down the entire process, 
+				making it difficult to isolate and recover from the failure.
+
+Security risks: Because threads share the same memory space as the parent process, 
+		a vulnerability in one thread can potentially be exploited to compromise the security of the entire process.
+
+
+Advantages of using processes:
+==============================
+Strong isolation: Because each process has its own memory space, a failure in one process is less likely to affect other processes.
+Better security:  Because processes are isolated from each other, it is harder for attackers to compromise the security of multiple processes at once.
+More flexibility: Processes can be written in different programming languages and can run on different operating systems, making them more flexible than threads.
+
+Disadvantages of using processes:
+================================
+Increased resource consumption: Processes require more resources (such as memory and CPU time) than threads, because each process has its own memory space and system resources.
+Slower communication: Inter-process communication mechanisms such as pipes or sockets can be slower than direct communication between threads within the same process.
+More difficult to coordinate: Because processes are completely separate entities, coordinating their activities can be more difficult than coordinating the activities of threads within the same process.
+
+
+=======================================================================================================================================
+What happens when a multithreaded program is preempted by the scheduler?
+
+
+When a multithreaded program is preempted by the scheduler,
+ it means that the operating system has temporarily stopped one of its threads
+ and switched to another thread to execute. This can happen for a number of reasons, s
+uch as when a higher-priority thread becomes ready to run or when a thread voluntarily yields the CPU.
+
+When a thread is preempted, its state is saved so that it can be resumed later
+ when it is scheduled to run again. This state typically includes the thread's 
+program counter (which indicates where in the program the thread was executing), 
+its register values, and any other relevant state information.
+
+The operating system then switches to another thread and begins executing it. 
+When this thread is preempted, its state is saved in the same way and the operating system switches back to the first thread,
+ restoring its saved state and continuing execution where it left off.
+
+This process of preempting and resuming threads is known as context switching, 
+and it is a fundamental mechanism for supporting multitasking and concurrency in modern operating systems.
+
+It's worth noting that preemption and context switching can 
+introduce overhead and can affect the performance of a multithreaded program. 
+Developers need to be mindful of this and design their programs to minimize 
+unnecessary context switches and maximize the efficiency of their use of CPU time
+
+=======================================================================================================================================
+
+
+
+=======================================================================================================================================
+Is there any difference between a synchronization primitive that has to operate between processes vs.
+between threads in a single process?
+
+Yes, there are differences between synchronization primitives that operate between 
+processes versus those that operate between threads in a single process.
+
+Synchronization primitives, such as mutexes, semaphores, and condition variables, are used to coordinate access to shared resources between multiple threads or processes. The main difference between synchronization primitives for inter-process communication (IPC) and those for inter-thread communication (ITC) is the level of abstraction at which they operate.
+
+IPC synchronization primitives, such as message queues, pipes, and sockets, operate at a higher level of abstraction than ITC synchronization primitives. They typically involve communication between processes over some kind of communication channel, and may involve serialization, marshaling, or other operations to send data across process boundaries.
+
+In contrast, ITC synchronization primitives, such as mutexes, semaphores, and condition variables,
+ operate at a lower level of abstraction and do not involve inter-process communication. 
+They are used to manage access to shared resources within a single process, 
+and typically involve direct manipulation of data structures in memory.
+
+Another key difference between IPC and ITC synchronization primitives is the performance impact. 
+IPC synchronization primitives are typically slower and more resource-intensive than ITC synchronization primitives, 
+because they involve communication between different processes, which may be running on different CPUs or even different machines.
+ITC synchronization primitives, on the other hand, are typically faster and more lightweight, 
+because they operate within a single process and do not involve inter-process communication.
+
+Overall, while the basic concepts and principles of synchronization are similar between IPC and ITC,
+the details of how synchronization primitives are implemented and used can be quite different, 
+depending on whether they are operating between processes or between threads in a single process.
+=======================================================================================================================================
+How do threads interact with file locking?
+
+=======================================================================================================================================
+When would you use each of these threading models, and why?
+
+=======================================================================================================================================
+Free-threading  Rental-model threading  Apartment model threading  Thread pooling
+
+=======================================================================================================================================
+
+What’s a pool mutex, and when and why would you use it instead of some other form of synchronization?
+=======================================================================================================================================
+What’s the difference between a mutex and a semaphore?
+
+
+A mutex and a semaphore are both synchronization primitives that are used 
+to manage access to shared resources in concurrent programs, 
+but they have some key differences in their implementation and usage.
+
+A mutex is a locking mechanism that allows only one thread to access a shared resource at a time.
+It provides exclusive access to the resource, meaning that once a thread has acquired the mutex lock,
+all other threads attempting to access the resource will be blocked until the lock is released. 
+This helps to prevent race conditions and data corruption that can occur 
+when multiple threads attempt to modify a shared resource simultaneously.
+
+In contrast, a semaphore is a signaling mechanism that can be used to control access 
+to a shared resource by multiple threads. It allows a specified number of threads
+ to access the resource simultaneously, and blocks any additional 
+threads from accessing the resource until one of the existing threads releases the semaphore. 
+Semaphores can be used to implement various synchronization scenarios, 
+such as limiting the number of threads that can access a resource,
+ coordinating the order in which threads access a resource, or signaling when a resource is available.
+
+Another key difference between mutexes and semaphores is the way they are initialized and used.
+ A mutex is typically initialized as "unlocked" and must be explicitly locked and unlocked by threads that wish to access the shared resource. A semaphore, on the other hand, is initialized with a specified number of "permits" that allow threads to access the resource. Threads that wish to access the resource must first acquire a permit from the semaphore, and must release the permit when they are finished.
+
+Overall, mutexes and semaphores are both important tools for managing access 
+to shared resources in concurrent programs, but they have different strengths and use cases.
+ Mutexes provide exclusive access to a resource and can help prevent race conditions,
+ while semaphores allow multiple threads to access a resource and can help 
+coordinate access to shared resources in complex synchronization scenarios.
+
+=======================================================================================================================================
+
+What’s the difference between a mutex and a lock?
+
+=======================================================================================================================================
+What’s better: recursive locks, or non-recursive locks, and why?
+
+
+Whether recursive locks or non-recursive locks are better depends on the specific requirements of the program and the way in which the locks will be used.
+
+A recursive lock allows the same thread to acquire the lock multiple times without becoming blocked. Each call to acquire the lock must be paired with a corresponding call to release the lock before the lock is released by the thread. Recursive locks can be useful in situations where a function or method needs to acquire the same lock multiple times, or when multiple nested functions need to access a shared resource protected by the lock.
+
+Non-recursive locks, on the other hand, only allow a thread to acquire the lock once. If a thread attempts to acquire the lock again while it already holds the lock, it will become blocked. Non-recursive locks are simpler to implement and may provide better performance in situations where recursive locks are not needed.
+
+In general, recursive locks can be useful in complex programs where multiple functions or methods may need to access the same shared resource. However, they can also be more difficult to reason about and may lead to deadlocks or other synchronization issues if used improperly. Non-recursive locks, on the other hand, are simpler and may provide better performance, but they may not be suitable for programs with complex synchronization requirements.
+
+Ultimately, the choice between recursive locks and non-recursive locks depends on the specific requirements of the program and the way in which the locks will be used. Programmers should carefully consider the synchronization requirements of their program and choose the type of lock that best meets those requirements while minimizing the risk of synchronization issues.
+
+======================================================================================
+Whether recursive locks or non-recursive locks are better depends on the specific requirements of the program and the way in which the locks will be used.
+
+A recursive lock allows the same thread to acquire the lock multiple times without becoming blocked. Each call to acquire the lock must be paired with a corresponding call to release the lock before the lock is released by the thread. Recursive locks can be useful in situations where a function or method needs to acquire the same lock multiple times, or when multiple nested functions need to access a shared resource protected by the lock.
+
+Non-recursive locks, on the other hand, only allow a thread to acquire the lock once. If a thread attempts to acquire the lock again while it already holds the lock, it will become blocked. Non-recursive locks are simpler to implement and may provide better performance in situations where recursive locks are not needed.
+
+In general, recursive locks can be useful in complex programs where multiple functions or methods may need to access the same shared resource. However, they can also be more difficult to reason about and may lead to deadlocks or other synchronization issues if used improperly. Non-recursive locks, on the other hand, are simpler and may provide better performance, but they may not be suitable for programs with complex synchronization requirements.
+
+Ultimately, the choice between recursive locks and non-recursive locks depends on the specific requirements of the program and the way in which the locks will be used. Programmers should carefully consider the synchronization requirements of their program and choose the type of lock that best meets those requirements while minimizing the risk of synchronization issues.
+
+=======================================================================================================================================
+What’s a serialization barrier?
+
+=======================================================================================================================================
+Is there a difference between serializing data vs. serializing CPU instructions?
+What’s an atomic operation?
+
+=======================================================================================================================================
+What’s the difference, if any, between idempotence, and atomicity?
+
+=======================================================================================================================================
+What’s the difference between voluntary and involuntary preemption?
+
+
+=======================================================================================================================================
+How does a call conversion scheduler work?
+
+I’ve always wondered… what precisely is the difference between a thread and a process?
+=======================================================================================================================================
+
+What’s a thread specific variable?
+=======================================================================================================================================
+What’s the difference between a thread-safe and a thread-unsafe function?
+=======================================================================================================================================
+What’s a critical section?
+
+
+In concurrent programming, a critical section is a section of code that 
+accesses shared resources and must be executed atomically, 
+meaning that it must be executed by a single thread at a time. 
+The purpose of a critical section is to prevent race conditions,
+ which can occur when multiple threads attempt to access and modify shared resources simultaneously.
+
+A critical section typically involves acquiring a lock on a synchronization primitive, 
+such as a mutex or semaphore, before accessing the shared resource. 
+Once a thread has acquired the lock, it is the only thread that 
+can access the shared resource until it releases the lock.
+ This ensures that the shared resource is accessed and modified 
+in a safe and consistent manner, without any conflicts or data corruption
+ that can occur when multiple threads modify the resource simultaneously.
+
+It is important to keep the critical section as short as possible to minimize 
+the time that other threads are blocked waiting to access the shared resource.
+Access to the shared resource should be limited to the necessary code that modifies or accesses it,
+ and any other code that does not need to access the shared resource should be executed outside the critical section.
+
+Overall, critical sections are a fundamental concept in concurrent programming 
+and are used to ensure safe and consistent access to shared resources by multiple threads.
+
+
+=======================================================================================================================================
+Assume you have two threads that can come into the same code, and might try to operate on the same data at the same time; 
+do you lock the data to keep them from doing it, or do you lock the critical section of code to keep them from doing it?
+=======================================================================================================================================
+
+Explain scoping of pointers to allocated and reference counted objects, and tell me why it matters, or if it doesn’t, why not?
+=======================================================================================================================================
+What’s a thread exit mean?
+
+
+In concurrent programming, a thread exit refers to the process of terminating a thread 
+and releasing the resources associated with it.
+ When a thread completes its execution, it can either exit voluntarily or be terminated by the operating system.
+
+A voluntary thread exit occurs when the thread reaches the end of its code or 
+when it calls a thread-specific exit function such as pthread_exit() in POSIX systems.
+When a thread exits voluntarily, it can return a value that can be retrieved by
+ other threads to determine the outcome of the thread's execution.
+
+In contrast, a thread can be terminated by the operating system if it 
+violates certain rules or if the program is shut down while the thread is still running.
+ Thread termination can be done forcefully by sending a signal to the thread, such as SIGKILL or SIGTERM in POSIX systems.
+
+When a thread exits, any resources associated with the thread are released, 
+such as memory, locks, and file descriptors.
+ If the thread has created any child threads, 
+those threads will continue to run unless they are also terminated or exit voluntarily.
+
+It is important for programs to manage thread exits properly to prevent memory leaks and other synchronization issues. 
+Programs should ensure that all threads are properly terminated and 
+that any shared resources are released before the program exits.
+
+
+=======================================================================================================================================
+
+What’s a thread join?
+
+In concurrent programming, a thread join is a synchronization mechanism that allows 
+one thread to wait for another thread to complete its execution before continuing.
+When a thread join is called, the calling thread blocks and waits for the target thread to complete.
+
+The thread join function typically takes a thread handle or identifier as its argument and waits for that thread to exit. 
+Once the target thread has completed its execution, 
+the calling thread is unblocked and can continue executing.
+
+Thread joins are often used in situations where multiple threads are working together to perform a task,
+and one thread must wait for another thread to complete a critical section of code before continuing.
+Thread joins can also be used to ensure that all threads have completed their execution before a program exits, 
+to prevent memory leaks and other synchronization issues.
+
+In addition to waiting for the target thread to complete, 
+a thread join function may also retrieve a return value or exit status from the target thread, 
+allowing the calling thread to determine the outcome of the target thread's execution.
+
+Overall, thread joins are a useful synchronization mechanism in concurrent programming that
+allows threads to coordinate their execution and ensure that critical sections of code are executed in a safe and consistent manner.
+
+
+=======================================================================================================================================
+
+When you create a thread, why would you want to set thread attributes other than the default, 
+on creation, rather than right after, to make the code simpler?
+=======================================================================================================================================
+What happens to your threads when you vfork?
+=======================================================================================================================================
+What happens to your threads when you fork?
+=======================================================================================================================================
+What happens to your threads when you exec?
+=======================================================================================================================================
+What are some security implications to using threads vs. using processes?
+
+=======================================================================================================================================
+
+Can one thread cause another thread to crash?
+
+Yes, it is possible for one thread to cause another thread to crash.
+ In a multithreaded program, each thread runs in its own context and has access to shared resources,
+ such as memory, file descriptors, and synchronization primitives.
+
+If one thread accesses a shared resource in an unsafe way, such as reading or 
+writing to a memory location that has been freed or has not been properly allocated, 
+it can corrupt the shared resource and cause other threads that rely on that resource to fail or crash.
+
+Similarly, if one thread holds a synchronization primitive such as a lock or a semaphore and does not release it,
+ it can cause other threads that are waiting on that primitive to block indefinitely or crash.
+
+Other ways in which one thread can cause another thread to crash include:
+
+Raising an unhandled exception or signal that propagates to other threads
+Calling a system function that affects the state of the entire process, such as changing the process's signal handlers or memory allocation settings
+Crashing due to a hardware or software error that affects the entire process, such as a segmentation fault or stack overflow
+To avoid these issues, it is important for programs to use proper synchronization mechanisms, such as locks and semaphores, to protect shared resources and ensure that threads are properly synchronized. Programs should also use defensive programming techniques, such as boundary checking and error handling, to prevent one thread from corrupting the state of another thread.
+=======================================================================================================================================
+
+If one thread can cause another thread to crash, does just the thread crash, or does the whole program crash?
+
+How many threads should you use in a program that runs on a 4 CPU system, and why?
+
+
+=======================================================================================================================================
+
+What’s a dispatch thread? Are dispatch threads used very often anyway?
+=======================================================================================================================================
+When do you use dispatch threads?
+
+=======================================================================================================================================
+
+Have you ever heard of “sfork”?
+
+=======================================================================================================================================

@@ -1,0 +1,106 @@
+
+write a code C++ for multi thread application accessing common data structure  
+
+-------------------------------------------------------------------------
+#include <iostream>
+#include <vector>
+#include <thread>
+#include <mutex>
+
+std::vector<int> my_vector; // shared data structure
+std::mutex my_mutex; // mutex for synchronization
+
+void thread_func(int thread_id) {
+    for (int i = 0; i < 10; i++) {
+        my_mutex.lock(); // lock before accessing shared data structure
+        my_vector.push_back(thread_id * 10 + i); // modify shared data structure
+        my_mutex.unlock(); // unlock after accessing shared data structure
+    }
+}
+
+int main() {
+    std::thread threads[3]; // create 3 threads
+    
+    // start threads and wait for them to finish
+    for (int i = 0; i < 3; i++) {
+        threads[i] = std::thread(thread_func, i);
+    }
+    for (int i = 0; i < 3; i++) {
+        threads[i].join();
+    }
+    
+    // print contents of shared data structure
+    for (int i = 0; i < my_vector.size(); i++) {
+        std::cout << my_vector[i] << " ";
+    }
+    std::cout << std::endl;
+    
+    return 0;
+}
+-------------------------------------------------------------------------
+
+
+write a code C++ for multi thread application accessing common data structure  
+
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <vector>
+
+std::vector<int> shared_data;
+std::mutex mtx;
+
+void thread_function(int thread_id)
+{
+    // Lock the mutex before accessing the shared data
+    mtx.lock();
+
+    // Access the shared data
+    shared_data.push_back(thread_id);
+
+    // Unlock the mutex after accessing the shared data
+    mtx.unlock();
+}
+
+int main()
+{
+    // Create multiple threads to access the shared data
+    std::thread t1(thread_function, 1);
+    std::thread t2(thread_function, 2);
+    std::thread t3(thread_function, 3);
+    std::thread t4(thread_function, 4);
+
+    // Wait for all threads to complete
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
+
+    // Print the shared data
+    for (auto i : shared_data)
+    {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+
+    return 0;
+}
+
+
+
+==========================================================================
+https://www.mygreatlearning.com/blog/cpp-interview-questions/
+https://www.tutorialspoint.com/cplusplus/cpp_interview_questions.htm
+https://www.geeksforgeeks.org/cpp-interview-questions/
+https://www.javatpoint.com/cpp-interview-questions
+https://www.testgorilla.com/blog/cpp-interview-questions-sample-answers/
+
+
+=============================================================================
+Basic ::
+https://www.youtube.com/watch?v=6HuptuHyJZg  <<-- 
+https://www.youtube.com/watch?v=EUfJE3rHYoY
+====================================================
+https://www.youtube.com/watch?v=-d-Stdl9PfQ
+https://www.youtube.com/watch?v=s2Bu3KNFUOk

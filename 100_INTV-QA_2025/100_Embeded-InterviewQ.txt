@@ -1,0 +1,122 @@
+Here are 100 embedded interview questions for experienced candidates. These questions cover a range of topics related to embedded systems, including programming, hardware, and real-time operating systems. Keep in mind that interviewers may ask variations of these questions, so it's important to understand the underlying concepts.
+
+What is an embedded system?
+An embedded system is a computer system designed to perform specific tasks with a dedicated function within a larger mechanical or electrical system. These systems are typically low-power, small, and operate in real-time. Examples of embedded systems include smart appliances, medical devices, automotive systems, and industrial control systems.
+
+What are the key characteristics of embedded systems?
+The key characteristics of embedded systems are their real-time operation, low-power consumption, small size, and dedicated function. They are typically designed to perform a specific task, often in a harsh or challenging environment. They may also have limited resources, such as memory, processing power, or energy supply, and must be reliable and operate continuously for extended periods.
+
+Explain microcontroller vs. microprocessor.
+A microcontroller is a small computer on a single chip that contains a processor, memory, and input/output peripherals. It is typically used for embedded systems where low-power, real-time operation is required. In contrast, a microprocessor is a more powerful CPU that does not include built-in peripherals and is used in general-purpose computing applications, such as personal computers and servers.
+
+What is an RTOS (Real-Time Operating System)?
+An RTOS is a type of operating system designed for embedded systems that require real-time processing. It manages the allocation of resources, such as processing time, memory, and input/output, to ensure that tasks are executed within specific time constraints. Examples of RTOSs include FreeRTOS, VxWorks, and QNX.
+
+Describe the difference between preemptive and non-preemptive scheduling.
+Preemptive scheduling is a method of scheduling tasks in an operating system where higher priority tasks can interrupt lower priority tasks. This ensures that important tasks are executed immediately, even if lower priority tasks are still running. Non-preemptive scheduling, on the other hand, allows a task to continue running until it completes or explicitly yields control to another task.
+
+How do you measure the performance of an embedded system?
+The performance of an embedded system can be measured using various metrics, 
+including processing time, memory usage, power consumption, and throughput.
+ Benchmark tests can be used to evaluate the system's performance under different loads and conditions, 
+and profiling tools can be used to analyze the system's behavior and identify bottlenecks or performance issues.
+ Real-time performance can also be measured using techniques such as response time analysis and worst-case execution time analysis.
+
+
+
+
+==========================================================================
+What is the role of an ISR (Interrupt Service Routine)?
+Explain the difference between polling and interrupt-driven I/O.
+What is a watchdog timer and how does it work?
+Describe the various types of memory used in embedded systems.
+What is a memory-mapped I/O?
+What are the different types of embedded system communication protocols?
+Explain UART, SPI, and I2C communication protocols.
+Describe the difference between Little Endian and Big Endian byte ordering.
+What is a cross-compiler and why is it used in embedded systems?
+What are the key factors to consider when selecting an embedded system programming language?
+Explain the difference between RISC and CISC architectures.
+What is the role of a DMA (Direct Memory Access) controller?
+Describe the difference between volatile and non-volatile memory.
+What is the purpose of a memory management unit (MMU)?
+Explain the difference between hard real-time and soft real-time systems.
+Describe the concept of priority inversion and how to avoid it.
+What is a race condition and how can you prevent it?
+Explain the difference between mutex and semaphore.
+What are the common synchronization mechanisms used in embedded systems?
+Describe the various types of power-saving modes in a microcontroller.
+What is the role of a linker and a loader in embedded systems?
+Explain the difference between static and dynamic memory allocation.
+What is a memory leak and how can you avoid it?
+What is the stack and heap in embedded systems?
+Explain the concept of a stack overflow and how to prevent it.
+What is the purpose of a hardware abstraction layer (HAL)?
+Describe the various types of interrupts in a microcontroller.
+Explain the difference between a vector table and an interrupt table.
+How do you handle nested interrupts in an embedded system?
+What is the role of a system tick timer in an RTOS?
+Explain the concept of context switching in an embedded system.
+Describe the difference between a process and a thread.
+What is priority inheritance?
+Explain the difference between cooperative and preemptive multitasking.
+What is an embedded system development lifecycle?
+Describe the role of a bootloader in an embedded system.
+What is firmware and how does it differ from software?
+Explain the difference between a monolithic kernel and a microkernel.
+What is the role of a device driver in an embedded system?
+Describe the various types of buses used in embedded systems.
+Explain the difference between synchronous and asynchronous communication.
+What is the role of an oscillator in a microcontroller?
+Explain the difference between a timer and a counter.
+What is pulse width modulation (PWM)?
+Describe the various types of ADC (Analog-to-Digital Converter) techniques.
+Explain the difference between a DAC (Digital-to-Analog Converter) and an ADC.
+What is an interrupt latency?
+Describe the difference between a software timer and a hardware timer.
+What are the common debugging techniques used in embedded systems?
+Explain the difference between a simulator and an emulator.
+What is the role of an in-circuit emulator (ICE)?
+Describe the various types of embedded system testing.
+What is the purpose of a JTAG (Joint Test Action Group) interface?
+Explain the difference between a logic analyzer and an oscilloscope.
+What are the common types of embedded system sensors?
+Describe the various types of embedded system actuators.
+What is a motor control algorithm?
+Explain the difference between open-loop and closed-loop control systems.
+What is a PID (Proportional-Integral-Derivative) controller?
+What is a control system's bandwidth?
+Describe the difference between a state machine and a state chart.
+What is the role of a Finite State Machine (FSM) in embedded systems?
+Explain the difference between a Moore and a Mealy state machine.
+What is the purpose of a real-time clock (RTC) in an embedded system?
+Describe the role of an EEPROM (Electrically Erasable Programmable Read-Only Memory).
+72.What is a flash memory, and how does it differ from EEPROM?
+Explain the difference between a microcontroller's sleep mode and power-down mode.
+What is brownout detection in a microcontroller?
+Describe the difference between a master and a slave in I2C communication.
+What is clock stretching in I2C communication?
+Explain the difference between synchronous and asynchronous resets.
+What is the role of a debouncer in an embedded system?
+Describe the difference between edge-triggered and level-triggered interrupts.
+What is the purpose of a reset controller in an embedded system?
+Explain the difference between a stateless and stateful protocol.
+What are the common types of embedded system network topologies?
+Describe the role of a gateway in an embedded system network.
+What is the purpose of a network protocol stack?
+Explain the difference between OSI and TCP/IP network models.
+What is the role of a network scheduler in an embedded system?
+Describe the difference between flow control and congestion control.
+What is the purpose of a checksum in data communication?
+Explain the difference between a cyclic redundancy check (CRC) and a parity bit.
+What is the role of error detection and correction techniques in embedded systems?
+Describe the difference between forward error correction (FEC) and automatic repeat request (ARQ) techniques.
+What is the purpose of a carrier sense multiple access (CSMA) protocol?
+Explain the difference between a collision detection and a collision avoidance system.
+What is the role of a network time protocol (NTP) in an embedded system?
+Describe the difference between a unicast, multicast, and broadcast communication.
+What is the purpose of a medium access control (MAC) address in an embedded system network?
+Explain the difference between a star and a mesh network topology.
+What is the role of a network bridge in an embedded system network?
+Describe the difference between a router and a switch.
+What is the purpose of a virtual private network (VPN) in an embedded system network?
