@@ -36,11 +36,13 @@
 
 ### 3. What is an Interrupt?
 
-An **interrupt** is a signal sent to the processor by hardware or software indicating an event that needs immediate attention. It temporarily halts the current operations, saves its state, and executes a function called an interrupt handler or interrupt service routine (ISR) to deal with the event. After the ISR is executed, the processor resumes normal operations.
+An **interrupt** is a signal sent to the processor by hardware or software indicating an event that needs immediate attention. 
+It temporarily halts the current operations, saves its state, and executes a function called an interrupt handler or interrupt service routine (ISR) to deal with the event. After the ISR is executed, the processor resumes normal operations.
 
 ### 4. What is a Watchdog Timer?
 
-A **watchdog timer** is a hardware timer used to detect and recover from computer malfunctions. It is set to a predefined time interval and must be periodically reset by the software. If the software fails to reset the timer within the interval, the watchdog timer assumes the system has malfunctioned and typically triggers a system reset or other corrective actions.
+A **watchdog timer** is a hardware timer used to detect and recover from computer malfunctions. 
+It is set to a predefined time interval and must be periodically reset by the software. If the software fails to reset the timer within the interval, the watchdog timer assumes the system has malfunctioned and typically triggers a system reset or other corrective actions.
 
 ### 5. Difference between Big-Endian and Little-Endian Byte Ordering
 
@@ -146,7 +148,7 @@ When writing an Interrupt Service Routine (ISR), there are several key considera
 
 ### Example of a Simple ISR in C:
 
-```c
+
 volatile int interrupt_flag = 0;
 
 void __interrupt() ISR() {
