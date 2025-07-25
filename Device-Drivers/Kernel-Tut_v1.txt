@@ -4,7 +4,7 @@ Moving interrupts to threads
 
 
 Processing interrupts from the hardware is a major source of latency in the kernel, because other interrupts are blocked while doing that processing. 
-For this reason, the realtime tree has a feature, called threaded interrupt handlers, that seeks to reduce the time spent with interrupts disabled to a bare minimum—pushing the rest of the processing out into kernel threads. But it is not just realtime kernels that are interested in lower latencies, so threaded handlers are being proposed for addition to the mainline.
+For this reason, the realtime tree has a feature, called threaded interrupt handlers, that seeks to reduce the time spent with interrupts disabled to a bare minimumâ€”pushing the rest of the processing out into kernel threads. But it is not just realtime kernels that are interested in lower latencies, so threaded handlers are being proposed for addition to the mainline.
 
 Reducing latency in the kernel is one of the benefits, but there are other advantages as well. The biggest is probably reducing complexity by simplifying or avoiding locking between the "hard" and "soft" parts of interrupt handling. Threaded handlers will also help the debuggability of the kernel and may eventually lead to the removal of tasklets from Linux. For these reasons, and a few others as well, Thomas Gleixner has posted a set of patches and a "request for comments" to add threaded interrupt handlers.
 
@@ -13,7 +13,7 @@ Traditionally, interrupt handling has been done with top half (i.e. the "hard" i
 Threaded interrupt handlers reduce that work even further, so the top half would consist of a "quick check handler" that just ensures the interrupt is from the device; 
 if so, it simply acknowledges the interrupt to the hardware and tells the kernel to wake the interrupt handler thread.
 
-In the realtime tree, nearly all drivers were mass converted to use threads, but the patch Gleixner proposes makes it optional—driver maintainers can switch if they wish to.
+In the realtime tree, nearly all drivers were mass converted to use threads, but the patch Gleixner proposes makes it optionalâ€”driver maintainers can switch if they wish to.
 Automatically converting drivers is not necessarily popular with all maintainers, but it has an additional downside as Gleixner notes: "Converting an interrupt to threaded makes only sense when the handler code takes advantage of it by integrating tasklet/softirq functionality and simplifying the locking."
 
 A driver that wishes to request a threaded interrupt handler will use:
@@ -28,10 +28,10 @@ The quick_check_handler checks to see if the interrupt was from the device, retu
 
 request_threaded_irq() will create a thread for the interrupt and put a pointer to it in the struct irqaction. In addition, a pointer to the struct irqaction has been added to the task_struct so that handlers can check the action flags for newly arrived interrupts. That reference is also used to prevent thread crashes from causing an oops. One of the few complaints seen so far about the proposal was a concern about wasting four or eight bytes in each task_struct that was not an interrupt handler (i.e. the vast majority). That structure could be split into two types, one for the kernel and one for user space, but it is unclear whether that will be necessary.
 
-Andi Kleen has a more general concern that threaded interrupt handlers will lead to bad code: "to be honest my opinion is that it will encourage badly written interrupt code longer term," but he seems to be in the minority. There were relatively few comments, but most seemed in favor—perhaps many are waiting to see the converted driver as Gleixner promises to deliver "real soon". If major obstacles don't materialize, one would guess the linux-next tree would be a logical next step, possibly followed by mainline merging for 2.6.29.
+Andi Kleen has a more general concern that threaded interrupt handlers will lead to bad code: "to be honest my opinion is that it will encourage badly written interrupt code longer term," but he seems to be in the minority. There were relatively few comments, but most seemed in favorâ€”perhaps many are waiting to see the converted driver as Gleixner promises to deliver "real soon". If major obstacles don't materialize, one would guess the linux-next tree would be a logical next step, possibly followed by mainline merging for 2.6.29.
 
 
-=============================================================================================================================================================================================
+=====================================================================================================================================================
 How "container_of" macro works, & an Example
 
 Here iam giving a small code snippet that gives and idea about working of "container_of", this posed me little difficulty in understanding, after google-ing i got some examples and after working on that i wrote a simple C application that depicts its working. here i have defined two macros "offsetof" and "container_of" which i have extracted from "kernel.h" header. 
@@ -206,8 +206,7 @@ mem_reg = ioremap(0x2100ff00,4)
 writel_relaxed(0x34,mem_reg)
 ================================================================================================
 
-
-cache coherence
+Cache coherence
 
 In a shared memory multiprocessor with a separate cache memory for each processor , it is possible to have many copies of any one instruction operand :
  one copy in the main memory and one in each cache memory. When one copy of an operand is changed, the other copies of the operand must be changed also. 
