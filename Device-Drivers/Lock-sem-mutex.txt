@@ -1,3 +1,53 @@
+
+In the **Linux kernel**, you **cannot use mutexes or semaphores inside interrupt context** (i.e., within an interrupt handler). Here's a breakdown:
+
+---
+
+### 🚫 **Why You Can't Use Mutexes or Semaphores in ISRs**
+
+- **Mutexes (`struct mutex`)**:
+  - Designed for **sleepable contexts** (process/thread context).
+  - Calling `mutex_lock()` in an ISR will **cause a kernel panic** or undefined behavior because ISRs cannot sleep.
+
+- **Semaphores (`struct semaphore`)**:
+  - Also sleepable; `down()` may block, which is **not allowed** in interrupt context.
+
+---
+
+### ✅ **What You Can Use Instead**
+
+1. **Spinlocks (`spinlock_t`)**:
+   - Safe in interrupt context.
+   - Use `spin_lock_irqsave()` / `spin_unlock_irqrestore()` to protect shared data between ISR and other contexts.
+
+2. **Tasklets / Workqueues**:
+   - Defer processing to a context where sleeping is allowed.
+   - Use `schedule_work()` or `tasklet_schedule()` from the ISR.
+
+3. **Atomic Variables**:
+   - Lightweight and safe for signaling or counters in ISRs.
+
+4. **Wake-up Mechanisms**:
+   - Use `wake_up()` to notify a sleeping thread waiting on a `wait_queue`.
+
+---
+
+### ✅ Example: Deferring Work from ISR
+
+static void my_irq_handler(int irq, void *dev_id)
+{
+    // Minimal ISR work
+    schedule_work(&my_work);  // Defer to workqueue
+}
+```
+
+---
+
+Would you like a full example showing how to use spinlocks or workqueues in a Linux kernel module?
+
+
+=============================
+
 What is the difference between spin lock, mutex,semaphore ?
 ========================================================================================
 Kernel Locking Techniques
