@@ -178,8 +178,6 @@ How does the kernel manage device drivers in Linux?
 The Linux kernel manages device drivers through a **modular, dynamic, and structured system** 
 that allows efficient communication between hardware and the operating system. Here’s a simplified breakdown:
 
----
-
 ### 🔧 1. **Driver Registration**
 
 * Drivers register themselves with the kernel using specific subsystem APIs (e.g., `platform_driver_register()`, `pci_register_driver()`).
@@ -276,8 +274,6 @@ What is the meaning of "probe" and "bind" in device driver development?
 
 In device driver development, particularly in the Linux kernel, **"probe"** and **"bind"** are key concepts used during the process of associating a driver with a device. Here's what they mean:
 
----
-
 ### 🔍 **Probe**
 
 - The **`probe()`** function is called by the kernel when it finds a device that matches a driver.
@@ -311,11 +307,7 @@ In device driver development, particularly in the Linux kernel, **"probe"** and 
 Would you like a code example showing how `probe()` is implemented in a Linux driver?
 ==============================================================================================================
 
-
 What is the purpose of a device tree in Linux device driver development?
-
-
-
 
 ### **Purpose of Device Tree in Linux Driver Development**  
 **Core Purpose**:  
@@ -349,12 +341,12 @@ To **separate hardware description from kernel code**, enabling a **single kerne
 
 ### **Why Drivers Need Device Tree**  
 #### **Problem Without DT**  
-```c  
+ 
 // Old approach (board file):  
 void __init board_init(void) {  
     register_uart(0, 0xFE201000, 37); // Hardware details baked into kernel  
 }  
-```  
+
 - **Drawbacks**:  
   - Kernel bloated with **board-specific C files**.  
   - **One kernel per device** (e.g., `zImage-for-board-A`, `zImage-for-board-B`).  
@@ -366,11 +358,10 @@ uart0: serial@ff000000 {
     reg = <0xff000000 0x1000>;  
     interrupts = <10>;  
 };  
-```  
-```c  
+ 
 // Driver code (portable):  
 res = platform_get_resource(pdev, IORESOURCE_MEM, 0); // DT provides address!  
-```  
+  
 - **Benefits**:  
   - Driver **doesn’t change** when hardware moves (e.g., UART address differs between boards).  
   - **One kernel** supports **all devices** with a DT.  
@@ -386,15 +377,13 @@ res = platform_get_resource(pdev, IORESOURCE_MEM, 0); // DT provides address!
        { .compatible = "ti,am3352-uart" }, // Matches DT node  
        {}  
    };  
-   ```  
+
 4. **Driver probes** and requests resources:  
-   ```c  
+
    void probe(struct platform_device *pdev) {  
        struct resource *mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);  
        void __iomem *base = ioremap(mem->start, resource_size(mem));  
    }  
-   ```  
-
 ---
 
 ### **Critical DT Operations for Drivers**  
@@ -422,7 +411,7 @@ res = platform_get_resource(pdev, IORESOURCE_MEM, 0); // DT provides address!
 > View your system’s DT:  
 > ```bash  
 > dtc -I fs /sys/firmware/devicetree/base  # Decompile live DT  
-> ```  
+> 
 
 ### **Summary**  
 **Device Tree = "Hardware Menu" for the Kernel**  
@@ -512,9 +501,7 @@ What is the meaning of "hotplugging" in device driver development?
 ==============================================================================================================
 How can you dynamically load and unload a device driver?
 
-
 Dynamically loading and unloading a device driver is a common task in Linux-based systems, especially during development or when managing kernel modules. Here's how it's typically done:
-
 ---
 
 ## 🧩 **Loading a Device Driver**
@@ -524,7 +511,6 @@ This is usually done using the `insmod` or `modprobe` command.
 ### 1. **Using `insmod`**
 
 sudo insmod my_driver.ko
-```
 - Loads the kernel module (driver) directly.
 - Requires the full path to the `.ko` (kernel object) file.
 - Does **not** resolve dependencies automatically.
@@ -544,7 +530,6 @@ sudo modprobe my_driver
 This is done using the `rmmod` or `modprobe -r` command.
 
 ### 1. **Using `rmmod`**
-
 sudo rmmod my_driver
 
 - Removes the module from the kernel.
@@ -553,7 +538,7 @@ sudo rmmod my_driver
 ### 2. **Using `modprobe -r`**
 ```bash
 sudo modprobe -r my_driver
-```
+
 - Also removes the module, handling dependencies more gracefully.
 
 ---
@@ -673,7 +658,6 @@ Great question! In Linux device driver development, `open()` and `file_operation
 
 ### Example:
 
-```c
 static int my_open(struct inode *inode, struct file *file) {
     printk(KERN_INFO "Device opened\n");
     return 0;
@@ -684,9 +668,6 @@ static struct file_operations fops = {
     .open = my_open,
     // other operations like .read, .write, etc.
 };
-```
-
----
 
 ## 🔁 Flow Summary
 
@@ -836,8 +817,6 @@ irqreturn_t my_interrupt_handler(int irq, void *dev_id) {
     return IRQ_HANDLED;
 }
 
----
-
 ### 🆚 **Compared to Workqueues**:
 
 * Tasklets are faster and lower-latency but **cannot sleep**.
@@ -872,10 +851,7 @@ In general, tasklets are best suited for handling small amounts of data or perfo
 ======================================================================================
 What is the purpose of the bottom half in device driver development?
 
-
 In Linux device driver development, the **bottom half** is a mechanism used to **defer work** that should not be done in the **interrupt context**. It allows the driver to handle time-consuming or blocking tasks **after** the interrupt handler has completed its quick, high-priority work.
-
----
 
 ## ⚡ Why Use a Bottom Half?
 
@@ -886,8 +862,6 @@ When an interrupt occurs (e.g., a device signals it's ready), the **top half** (
 - Avoid heavy processing
 
 To handle more complex or slower tasks, the work is deferred to the **bottom half**, which runs later in a safer context.
-
----
 
 ## 🧩 Types of Bottom Halves in Linux
 
@@ -949,8 +923,6 @@ In Linux device driver development, both **work queues** and **kernel threads** 
 | **Use Case** | Short, deferred tasks that don’t need their own thread | Long-running or looping tasks, polling, or complex state machines |
 | **Resource Usage** | Lightweight | Heavier (dedicated stack, scheduling) |
 | **Control** | Less control over scheduling and lifetime | Full control over thread behavior and lifecycle |
-
----
 
 ## 🧩 Example Use Cases
 
@@ -1146,7 +1118,6 @@ ssize_t device_read(...) {
     up(&my_sem);            // Release
     return count;
 }
-```
 
 ---
 
@@ -1527,24 +1498,18 @@ In Linux device driver development, the **kernel work queue** is a powerful mech
 ## 🧩 How It Works
 
 1. **Define a work structure**:
-   ```c
-   static DECLARE_WORK(my_work, my_work_handler);
-   ```
+     static DECLARE_WORK(my_work, my_work_handler);
+  
 
 2. **Schedule the work** (e.g., from an interrupt handler):
-   ```c
-   schedule_work(&my_work);
-   ```
-
+     schedule_work(&my_work);
+  
 3. **Implement the handler**:
-   ```c
+  
    void my_work_handler(struct work_struct *work) {
        // Perform deferred task here
    }
-   ```
-
----
-
+  
 ## ✅ When to Use Work Queues
 
 - Logging or reporting events
@@ -1983,13 +1948,10 @@ Both `vmalloc()` and `kmalloc()` allocate memory in the Linux kernel, but they s
 - **`kmalloc()`**: Allocating a buffer for a network card’s DMA transaction.
 - **`vmalloc()`**: Allocating a large buffer for a kernel module’s internal logging system.
 
-
-
 🔹 kmalloc()
 Allocates physically contiguous memory. Suitable for small to moderate memory allocations.
 Faster than vmalloc() because it uses the slab allocator. Can be used for DMA operations (since hardware often requires physical contiguity).
 Memory is directly mapped to the kernel's address space. Must be freed using kfree().
-
 
 🔹 vmalloc()
 Allocates virtually contiguous memory, which may be physically non-contiguous. Suitable for large memory allocations that kmalloc() cannot handle.
