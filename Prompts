@@ -1,0 +1,220 @@
+
+
+https://www.feedough.com/ai-prompt-generator/
+
+Prompti-1 
+You are an AI language model and are about to provide information related to the action "create" with a focus on "solution".
+Design a LINUX device drivers  that focuses on solution and addresses interview question and answers advance. Outline the key components of your solution,
+the logic behind your choices, and any possible alternatives. Additionally, discuss potential improvements and limitations of your design.
+
+
+You are an AI language model and are about to provide information related to the action "create" with a focus on "concept".
+Design a LINUX device drivers  that focuses on concept and addresses All possible interview question and answers . 
+Outline the key components of your solution, the logic behind your choices, 
+and any possible alternatives. Additionally, discuss potential improvements and limitations of your design.
+
+======================================================================================================================================================
+"Explain all the core concepts of    OF Gmock +
+ . Include definitions, architecture,
+ workflows, use cases, advantages, limitations, key components, and real-world examples. Prepare it as if for interview preparation. + WITH PROPER DEFINATIONS
+
+
+Prompt:
+"Explain all the core concepts of [your topic] using this link: [paste link here]. Include definitions, architecture,
+ workflows, use cases, advantages, limitations, key components, and real-world examples. Prepare it as if for interview preparation."
+
+
+"Give me all the core concepts of Buck2. Include definition, architecture, components, 
+how it works, use cases, advantages, limitations, and real-world relevance. 
+Prepare the explanation in a way that is useful for technical interviews."
+
+===================================================================================
+
+take this as source https://docs.zephyrproject.org/latest/kernel/services/smp/smp.html
+and create one app showing 2 or more threads using concept of smp  create new project
+
+==============================================
+
+2. Simple Explanation + Diagrams
+"Explain cmake in a clear and simple way, as if preparing for an interview.
+ Include diagrams, flows, or architecture if needed to make it easy to understand.
+
+Interview Q&A
+"List the top interview questions and answers on [your topic]. 
+Include basic to advanced technical, scenario-based, and practical questions with clear and concise answers."
+
+
+
+-->Use Cases + Best Practices
+"Give me the top use cases and best practices for [your topic].
+ Explain how it's used in the industry, common configurations, challenges, and performance tips."
+
+
+-->Advanced Deep Dive
+"Explain EdenSCM in deep technical detail. 
+Include protocol-level flow, configurations, timing considerations, scalability,
+and integration with other systems. Make it suitable for advanced interview discussions."
+============================================================================================
+"Explain all core concepts of Buck2 using this guide: https://buck2.build/docs/about/getting_started/. 
+Cover definition, types, working, components, protocols (Fibre Channel, iSCSI, FCoE), advantages, and common interview questions."
+
+
+"Summarize all RAID levels from this link: https://www.techtarget.com/searchstorage/definition/RAID. 
+Explain RAID 0 to RAID 10, their pros and cons, use cases, performance vs redundancy trade-offs, and interview tips for RAID-based questions."
+
+
+
+
+
+FAQs and Interview Questions
+Prompt:
+"Generate a list of the most common interview questions and answers on [your topic] based on this resource: [paste link here]. 
+Include technical, practical, and scenario-based questions."
+
+"Summarize the key points of [your topic] from this article: [paste link here] 
+in a short, clear, bullet-point format for last-minute interview revision. Include must-know facts, terms, and tips."
+
+
+"Explain the best practices and real-world use cases for [your topic] using this link: [paste link here].
+Focus on deployment strategies, challenges, and how it’s used in industry. Add interview-level insights."
+
+
+
+==============================================================================================================================
+
+
+zehyr example code + mutex demo example tp demonstrate dedlock situation  qemu-system-i386  from this article:
+https://docs.zephyrproject.org/latest/kernel/services/synchronization/mutexes.html
+
+"Explain all core concepts of zpphyr threads scheduling using this guide: https://docs.zephyrproject.org/latest/kernel/services/scheduling/index.html#cpu-idling
+Cover definition, types, working, components and common interview questions."
+
+
+"Generate a list of the most common interview questions and answers on [your topic] based on this resource: 
+https://docs.zephyrproject.org/latest/kernel/services/scheduling/index.html#cpu-idling
+Include technical, practical, and scenario-based questions."
+
+======================
+Stock To idebtify stock 
+
+
+omplete Prompt for Technical Analysis of Price Charts
+Objective: You are an expert technical analyst with extensive experience in chart pattern recognition, indicator analysis, and market forecasting. I am providing you with a price chart for in-depth evaluation. Your task is to perform a comprehensive technical analysis, identifying key trends, patterns, and trading opportunities.
+
+Instructions for Analysis:
+1. Chart Overview
+Define the timeframe and asset class of the chart.
+Provide context on current price action and market sentiment.
+
+2. Trend Analysis
+Identify primary and secondary trends (bullish, bearish, or range-bound).
+Pinpoint support and resistance levels with precise price points.
+
+3. Key Pattern Identification
+Recognize chart patterns such as head & shoulders, triangles, flags.
+Determine completion targets based on historical movements.
+
+4. Technical Indicator Insights
+Evaluate RSI, MACD, Bollinger Bands, moving averages, and other indicators.
+Assess overbought/oversold conditions and momentum shifts.
+
+5. Volume Analysis
+Examine trading volume trends and their alignment with price action.
+Identify confirmation or divergence signals.
+
+6. Critical Price Levels
+Define pivot points, support/resistance zones, and key levels.
+Provide specific numerical values for reference.
+
+7. Trading Opportunities
+Identify potential entry points based on technical setups.
+Establish stop-loss levels and profit targets, maintaining a favorable risk/reward ratio.
+
+====================================================================================================================================
+
+Objective: You are a financial expert specializing in mutual fund analysis. Your task is to identify the best mutual funds in India that have historically delivered returns of around 30% annually.
+
+Instructions:
+Analyze Historical Performance:
+
+Identify mutual funds that have consistently delivered 30%+ CAGR over the last 3-5 years.
+
+Compare direct vs. regular plans for optimal returns.
+
+Fund Categories to Consider:
+
+Equity Mutual Funds (Large-cap, Mid-cap, Small-cap).
+
+Sectoral/Thematic Funds (Infrastructure, Technology, Banking).
+
+Aggressive Growth Funds with high-risk, high-reward potential.
+
+Key Metrics for Evaluation:
+
+Annualized Returns (CAGR) over different timeframes.
+
+Expense Ratio (lower is better for maximizing returns).
+
+Fund Manager Track Record and investment strategy.
+
+Risk Factors (volatility, drawdowns, market conditions).
+
+Compare Leading Mutual Funds:
+
+Provide a list of top-performing funds with detailed analysis.
+
+Highlight fund objectives, portfolio composition, and risk levels.
+
+Investment Suitability:
+
+Recommend funds based on investment horizon (short-term vs. long-term).
+
+Suggest SIP vs. lump sum investment strategies for maximizing returns.
+
+Real-World Data & Sources:
+
+Use credible financial sources like Moneycontrol, Value Research, and AMFI.
+
+Provide updated NAVs, AUM, and performance trends.
+
+============================================
+
+
+You are an expert technical recruiter with extensive experience in interviewing candidates for advanced technical positions,
+ particularly in the field of Linux device drivers. Your role involves not only assessing candidates' 
+ technical knowledge but also their problem-solving abilities and practical experience.
+
+Your task is to generate a comprehensive list of possible interview questions along with detailed answers for an 
+export-level position focusing on Linux device drivers. This should cover a wide range of topics, including but not limited to driver architecture, 
+kernel modules, debugging techniques, and interfacing with hardware.
+
+---
+
+The output should be structured clearly, with each question followed by its corresponding answer.
+ Each section should include a heading indicating the topic area, followed by the questions and answers listed in a bullet-point format for easy readability.
+
+---
+
+Keep in mind that the answers should be thorough, providing explanations and examples where applicable,
+ to ensure that candidates can demonstrate their understanding of the concepts discussed. 
+
+---
+
+Be cautious to avoid overly simplistic questions or answers that do not accurately reflect the depth of knowledge expected at the export level. 
+
+---
+
+Example of a question and answer format:
+
+**Driver Architecture:**
+- **Question:** What is the role of a device driver in the Linux kernel?
+  - **Answer:** A device driver acts as an intermediary between the hardware device and the operating system, translating OS commands into device-specific actions...
+
+**Kernel Modules:**
+- **Question:** How do you load and unload kernel modules?
+  - **Answer:** You can use the `insmod` command to load a kernel module and `rmmod` to unload it...
+
+--- 
+
+Please ensure that the content generated is original and not copied verbatim from existing resources, 
+while still accurately reflecting the principles and practices in Linux device driver development.
