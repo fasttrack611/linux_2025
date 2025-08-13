@@ -34,7 +34,7 @@ The reset sequence for ARM Cortex processors, particularly the Cortex-M series, 
 ### Example Code for Reset Handler
 Here’s a simplified example of what the reset handler might look like in the startup code for STM32 microcontrollers:
 
-```assembly
+  assembly
 ; Reset handler
 Reset_Handler PROC
     EXPORT Reset_Handler [WEAK]
@@ -46,7 +46,7 @@ Reset_Handler PROC
     LDR R0, =__main      ; Then call main()
     BX R0
 END
-```
+  
 
 ### Summary
 - **Initial Stack Pointer**: Loaded from `0x00000000`.
@@ -87,7 +87,7 @@ Here’s a detailed breakdown of what typically happens in the reset handler:
 ### Example Code for Reset Handler
 Here’s a simplified example of what the reset handler might look like in the startup code for STM32 microcontrollers:
 
-```assembly
+  assembly
 ; Reset handler
 Reset_Handler PROC
     EXPORT Reset_Handler [WEAK]
@@ -99,7 +99,7 @@ Reset_Handler PROC
     LDR R0, =__main      ; Then call main()
     BX R0
 END
-```
+  
 
 #### Breakdown of the Code
 1. **PROC Directive**: 
@@ -228,7 +228,7 @@ The FPCA bit is used in processors with a Floating Point Unit (FPU) to indicate 
 ### Example Usage
 Here is an example of how to read and modify the CONTROL register in assembly:
 
-```assembly
+  assembly
     .syntax unified
     .cpu cortex-m4
     .thumb
@@ -250,7 +250,7 @@ set_unprivileged_psp:
     ISB
 
     BX LR
-```
+  
 
 ### Explanation:
 1. **Read the current CONTROL register value**: The `MRS R0, CONTROL` instruction reads the current value of the CONTROL register into register R0.
@@ -283,7 +283,7 @@ The reset sequence for an ARM Cortex processor involves several steps to ensure 
 
 Here is a small code segment that illustrates the reset handler in the startup code of STM32-related MCUs:
 
-```assembly
+  assembly
 ; Reset handler
 Reset_Handler PROC
     EXPORT Reset_Handler [WEAK]
@@ -294,7 +294,7 @@ Reset_Handler PROC
     LDR R0, =__main      ; Then call main()
     BX R0
 END
-```
+  
 
 For more detailed information, you can refer to the following resources:
 - [EmbeTronicX: Reset Sequence in ARM Cortex-M4](https://embetronicx.com/tutorials/microcontrollers/stm32/reset-sequence-in-arm-cortex-m4/) [1](https://embetronicx.com/tutorials/microcontrollers/stm32/reset-sequence-in-arm-cortex-m4/)
@@ -343,7 +343,7 @@ int main(void) {
     generate_interrupt();
     return 0; // Optional but good practice
 } // Added missing closing brace
-```
+  
 ------------------------------------------------------------------------------------------
 
 ### Flow Explanation
@@ -404,10 +404,10 @@ Detailed explanation of the registers listed, focusing on their roles in ARM Cor
 #### **PRIMASK**
 - **Purpose**: Disables all configurable interrupts (sets priority mask to 0).  
 - **Usage**: Critical sections where interrupts must be temporarily blocked.  
-  ```asm
+    asm
   CPSID I ; Disable interrupts (set PRIMASK)
   CPSIE I ; Enable interrupts (clear PRIMASK)
-  ```
+    
 
 #### **FAULTMASK**
 - **Purpose**: Disables all interrupts **including hard faults** (sets priority mask to 0).  
@@ -490,10 +490,10 @@ These sub-registers are mutually exclusive but can be accessed individually or c
   | 26–0| Reserved | Do not modify. |
 
 - **Usage**:  
-  ```asm
+    asm
   MRS R0, APSR ; Read APSR into R0
   MSR APSR, R1 ; Write R1 to APSR (only non-reserved bits are updated)
-  ```
+    
 -------------------------------------------------------------------------------------------------------------
 
 #### **(b) Interrupt Program Status Register (IPSR)**
@@ -505,9 +505,9 @@ These sub-registers are mutually exclusive but can be accessed individually or c
   | 9–31| Reserved | Do not modify. |
 
 - **Usage**:  
-  ```asm
+    asm
   MRS R0, IPSR ; Read current exception number into R0
-  ```
+    
 
 #### **(c) Execution Program Status Register (EPSR)**
 - **Purpose**: Tracks the **processor’s execution state**.
@@ -519,43 +519,43 @@ These sub-registers are mutually exclusive but can be accessed individually or c
   | Others| Reserved | Do not modify. |
 
 - **Usage**:  
-  ```asm
+    asm
   MRS R0, EPSR ; Read EPSR into R0 (rarely modified directly)
-  ```
+    
 
 -------------------------------------------------------------------------------------------
 
 ### **3. Accessing the PSR**
 #### **(a) Combined Access**  
 You can access all three sub-registers as a single `PSR`:  
-```asm
+  asm
 MRS R0, PSR ; Read full PSR into R0
 MSR PSR, R1 ; Write R1 to PSR (updates APSR, IPSR, EPSR)
-```
+  
 
 #### **(b) Partial Combinations**  
 Access specific combinations (e.g., `APSR_nzcvq` for condition flags):  
-```asm
+  asm
 MSR APSR_nzcvq, R0 ; Update only N, Z, C, V, Q flags in APSR
-```
+  
 
 ---
 
 ### **4. Key Use Cases**
 1. **Conditional Branching**:  
    The APSR flags (`N`, `Z`, `C`, `V`) are used to control conditional instructions:  
-   ```asm
+     asm
    CMP R0, R1 ; Compare R0 and R1 (sets APSR flags)
    BGT label ; Branch if R0 > R1 (uses N, Z, V flags)
-   ```
+     
 
 2. **Exception Handling**:  
    The IPSR identifies the active exception. For example, in an ISR:  
-   ```c
+     c
    void ISR() {
      uint32_t isr_number = __get_IPSR(); // Read exception number
    }
-   ```
+     
 
 3. **Interruptible Instructions**:  
    The EPSR’s `ICI` bits allow resuming interrupted load/store multiple (`LDM/STM`) operations after an exception.
@@ -583,7 +583,7 @@ uint32_t get_current_exception(void) {
 
 // Set the Q flag in APSR (saturation)
 __asm volatile("MSR APSR_nzcvq, %0" :: "r"(0x08000000)); // Sets Q=1
-```
+  
 
 ---
 
@@ -712,7 +712,7 @@ Certainly! Here are examples of using inline assembly (`asm volatile`) in C to c
 ### NVIC (Nested Vectored Interrupt Controller)
 The NVIC manages interrupts and their priorities. Here's an example of enabling an interrupt and setting its priority using inline assembly.
 
-```c
+  c
 #include "stm32f4xx.h"  // Include the appropriate header file for your microcontroller
 
 void NVIC_Configuration(void) {
@@ -786,12 +786,12 @@ int main(void) {
         // Main loop
     }
 }
-```
+  
 
 ### SCB (System Control Block)
 The SCB configures system-wide features such as reset and sleep. Here's an example of setting the system to sleep mode using inline assembly.
 
-```c
+  c
 #include "stm32f4xx.h"  // Include the appropriate header file for your microcontroller
 
 void SCB_Configuration(void) {
@@ -812,7 +812,7 @@ int main(void) {
         // Main loop
     }
 }
-```
+  
 
 ### DEBUG Registers
 The DEBUG registers support debugging features such as breakpoints and watchpoints. Here's an example of setting a breakpoint using inline assembly.
@@ -961,7 +961,7 @@ int main(void) {
         // Main loop (keep the CPU running)
     }
 }
-```
+  
 
 **Explanation:**
 
@@ -1038,11 +1038,11 @@ The **T bit** in the **EPSR (Execution Program Status Register)** plays a critic
 ---
 
 ### **Example Scenario**
-```c
+  c
 // Function pointer example (compiler ensures LSB = 1)
 void (*func_ptr)(void) = (void (*)(void))0x2000;
 func_ptr(); // Compiler generates: func_ptr | 1
-```
+  
 
 ---
 
@@ -1083,10 +1083,10 @@ The SRAM (128KB) is partitioned into three primary regions:
 
 ### **2. ARM Cortex-M Specifics**
 - **Linker Script**: Defines memory regions (e.g., `FLASH`, `RAM`), stack size, and heap size. Example:  
-  ```ld
+    ld
   STACK_SIZE = 0x2000; /* 8KB stack */
   HEAP_SIZE = 0x1000; /* 4KB heap */
-  ```
+    
 - **Startup Code**:  
   - Initializes the **stack pointer** to `RAM_END`.  
   - Copies `.data` from Flash to RAM and clears `.bss`.  
@@ -1144,7 +1144,7 @@ In the context of ARM Cortex-M microcontrollers, the two stack placement configu
 
 ### **1. Type-1: Traditional Single-Stack Layout**
 #### **Memory Layout**:
-```
+  
 High Address (RAM_END)  
 |------------------|  
 | Unused |  
@@ -1156,7 +1156,7 @@ High Address (RAM_END)
 | Data | (Global/static variables)  
 |------------------|  
 Low Address (RAM_START)  
-```
+  
 
 #### **Key Features**:
 - **Stack Placement**:  
@@ -1184,7 +1184,7 @@ Low Address (RAM_START)
 
 ### **2. Type-2: Multi-Stack or Non-Standard Layout**
 #### **Memory Layout**:
-```
+  
 High Address (RAM_END)  
 |------------------|  
 | Stack | (Possibly multiple stacks)  
@@ -1196,7 +1196,7 @@ High Address (RAM_END)
 | Data |  
 |------------------|  
 Low Address (RAM_START)  
-```
+  
 
 #### **Key Features**:
 - **Stack Placement**:  
@@ -1411,22 +1411,22 @@ The NVIC uses dedicated registers to control interrupts:
 ### **5. Configuring Interrupts in Practice**  
 #### **Step 1: Enable the Peripheral Interrupt**  
 Each peripheral (e.g., UART) has its own control register to enable interrupt generation.  
-```c  
+  c  
 // Example: Enable UART receive interrupt in STM32  
 USART1->CR1 |= USART_CR1_RXNEIE;  
-```  
+    
 
 #### **Step 2: Configure the NVIC**  
 Use NVIC registers or vendor-specific libraries to set priorities and enable interrupts.  
-```c  
+  c  
 // Example: Enable UART1 interrupt in NVIC (STM32 HAL)  
 HAL_NVIC_SetPriority(USART1_IRQn, 2, 0); // Priority 2, subpriority 0  
 HAL_NVIC_EnableIRQ(USART1_IRQn);  
-```  
+    
 
 #### **Step 3: Write the Interrupt Service Routine (ISR)**  
 Define the handler for the interrupt.  
-```c  
+  c  
 void USART1_IRQHandler(void) {  
     if (USART1->ISR & USART_ISR_RXNE) {  
         // Handle received data  
@@ -1532,13 +1532,13 @@ The table describes the **Nested Vectored Interrupt Controller (NVIC)** register
 ---
 
 ### **5. Example Usage**  
-```c
+  c
 // Enable IRQ 10 (STM32/CMSIS style)
 NVIC_EnableIRQ(10); // Sets bit 10 in ISER0
 
 // Set priority of IRQ 10 to 5 (priority level 5)
 NVIC_SetPriority(10, 5); // Writes to IPR2 (since 10 interrupts = 2.5 registers, rounded to IPR2)
-```
+  
 
 ---
 
@@ -1563,7 +1563,7 @@ This structure allows Cortex-M processors to efficiently manage up to 240 interr
  
 Here's the **corrected and completed code** with explanations:
 
-```c
+  c
 #include <stdint.h>
 #include <stdio.h>
 
@@ -1592,7 +1592,7 @@ void USART3_IRQHandler(void) {
     
     // Clear interrupt pending bit (usually done via peripheral register)
 }
-```
+  
 
 ---
 
@@ -1615,18 +1615,18 @@ void USART3_IRQHandler(void) {
 ### **Critical Notes**:
 1. **Interrupt Source Check**:  
    Add a check for the specific interrupt flag in the ISR:
-   ```c
+     c
    // Example for STM32 (check RXNE flag)
    if (USART3->ISR & USART_ISR_RXNE) {
        // Handle received data
    }
-   ```
+     
 
 2. **Pending Bit Clearance**:  
    Clear the interrupt flag in the **peripheral's status register** (not just the NVIC):
-   ```c
+     c
    USART3->ICR |= USART_ICR_RXNECF; // Clear RXNE flag
-   ```
+     
 
 3. **Avoid `printf` in ISRs**:  
    Use lightweight logging or buffer-based approaches instead.
@@ -1703,7 +1703,7 @@ Certainly! Let's break down the explanation of the stack initialization and memo
 
 #### **`_estack` Definition**
 _estack = ORIGIN(RAM) + LENGTH(RAM); // 0x20000000 + 128K = 0x20020000
-```
+  
 - **Stack Pointer (SP) Initialization**:
   - The stack pointer (`SP`) is initialized to the end of the RAM, which is `0x20020000`.
   - In ARM Cortex-M microcontrollers, the stack grows **downward**, meaning it starts at a higher memory address and grows towards lower addresses.
@@ -1711,7 +1711,7 @@ _estack = ORIGIN(RAM) + LENGTH(RAM); // 0x20000000 + 128K = 0x20020000
 #### **Stack Size**
 
 _Min_Stack_size = 0x400; // 1 KB reserved for stack
-```
+  
 - **Minimum Stack Size**:
   - The linker reserves 1 KB (0x400 bytes) of space for the stack.
   - This is the **minimum** size, and developers may need to increase it for more complex applications that require more stack space (e.g., deep recursion, large local variables).
@@ -1721,7 +1721,7 @@ _Min_Stack_size = 0x400; // 1 KB reserved for stack
 #### **RAM (128 KB)**
 
 RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
-```
+  
 - **RAM Details**:
   - RAM starts at address `0x20000000`, which is standard for STM32F4 microcontrollers.
   - RAM is used for the stack, heap, and global/static variables.
@@ -1729,7 +1729,7 @@ RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
 #### **ROM (Flash, 1024 KB)**
 
 ROM (rx) : ORIGIN = 0x8000000, LENGTH = 1024K
-```
+  
 - **ROM Details**:
   - Flash memory starts at address `0x08000000`.
   - Flash memory stores the code (section `.text`), read-only data (section `.rodata`), and the vector table.
@@ -1811,9 +1811,9 @@ ARM defines stack models based on growth direction and pointer position:
 ### **3. Stack Placement in RAM**
 - **Options**:
   - **End of RAM**: Most common. Prevents overlap with `.data`, `.bss`, and heap. Example:
-    ```c
+      c
     _estack = ORIGIN(RAM) + LENGTH(RAM); // STM32 linker script
-    ```
+      
   - **Middle of RAM**: Rarely used, but helpful for dual-stack systems (MSP/PSP separation).
   - **External Memory (SDRAM)**: Requires careful initialization (see Tip 4).
 
@@ -1829,18 +1829,18 @@ ARM defines stack models based on growth direction and pointer position:
   1. Start with a small stack in internal RAM (e.g., 1 KB).
   2. Initialize SDRAM controller in `main()` or startup code.
   3. Redirect stack pointer to SDRAM:
-     ```c
+       c
      __set_MSP((uint32_t)SDRAM_STACK_END); // Manually update MSP
-     ```
+       
 - **Example Code**:
-  ```c
+    c
   // In startup.s: Temporary stack in internal RAM
   Reset_Handler:
       LDR SP, =_estack_internal // Initial internal stack
       BL SystemInit // Configure SDRAM
       LDR SP, =_estack_sdram // Switch to SDRAM stack
       BL main
-  ```
+    
 =========================================================================================================================
 ### **In-Depth Explanation: ARM Cortex-M Interrupt Priority Registers (NVIC_IPR0-NVIC_IPR59)**
 
@@ -1888,17 +1888,17 @@ The NVIC contains multiple register groups to control interrupts. The table in t
 ### **3. Configuring Interrupt Priorities**
 #### **Using CMSIS Functions**
 The Cortex Microcontroller Software Interface Standard (CMSIS) simplifies priority configuration:
-```c
+  c
 // Set IRQn (e.g., UART_IRQn) to priority 5
 NVIC_SetPriority(IRQn, 5);
 
 // Read the priority of IRQn
 uint32_t priority = NVIC_GetPriority(IRQn);
-```
+  
 
 #### **Direct Register Access**
 For advanced use cases, directly manipulate the IPR registers:
-```c
+  c
 // Calculate the register index and field offset
 uint32_t reg_offset = IRQn / 4; // IPR register index (e.g., IRQ5 → IPR1)
 uint32_t field_pos = (IRQn % 4) * 8; // Field position within the register
@@ -1908,7 +1908,7 @@ uint32_t priority_value = (5 << (8 - __NVIC_PRIO_BITS));
 
 // Write to the register
 NVIC->IP[reg_offset] = (priority_value << field_pos);
-```
+  
 
 ---
 
@@ -1925,10 +1925,10 @@ The **Application Interrupt and Reset Control Register (AIRCR)** splits the prio
 | `NVIC_PRIORITYGROUP_2` | 2 bits (4 levels) | 2 bits (4 levels) | 4 pre-empt, 4 sub-priority |
 
 #### **Configuration Code**:
-```c
+  c
 // Set priority grouping to 2 pre-empt bits and 2 sub-priority bits
 NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
-```
+  
 
 ---
 
@@ -1944,10 +1944,10 @@ NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
 ### **6. Software Trigger Interrupt Register (STIR)**
 The `STIR` register allows software to trigger interrupts manually:
-```c
+  c
 // Trigger IRQn via software
 NVIC->STIR = IRQn;
-```
+  
 - **Use Case**: Testing ISRs or synchronizing tasks in RTOS.  
 - **Priority**: Follows the priority defined in the corresponding IPR.  
 
@@ -1960,9 +1960,9 @@ NVIC->STIR = IRQn;
 2. **Field Position**:  
    - 37 % 4 = 1 → Second 8-bit field in `IPR9` (bits `[15:8]`).  
 3. **Set Priority**:  
-   ```c
+     c
    NVIC_SetPriority(UART_IRQn, 0); // Highest priority (0)
-   ```
+     
 
 ---
 
@@ -2184,30 +2184,30 @@ This code is designed to **trigger and handle hardware faults** (e.g., MemManage
 
 #### **1. Fault Configuration**  
 - **Enable Fault Handlers**:  
-  ```c
+    c
   uint32_t *pSHCSR = (uint32_t*)0xE000ED24; // SHCSR register address
   *pSHCSR |= (1 << 16); // Enable MemManage Fault
   *pSHCSR |= (1 << 17); // Enable BusFault
   *pSHCSR |= (1 << 18); // Enable UsageFault
-  ```  
+      
   This configures the System Handler Control and State Register (SHCSR) to enable fault exceptions for debugging.
 
 ---
 
 #### **2. Triggering Faults**  
 - **Invalid Memory Write**:  
-  ```c
+    c
   uint32_t *pSRAM = (uint32_t*)0x20010000; // Valid SRAM address
   *pSRAM = 0xFFFFFFFF; // Write valid data (harmless)
-  ```  
+      
   *(Note: This line alone does not cause a fault. The actual fault is triggered later.)*
 
 - **Misaligned Function Pointer**:  
-  ```c
+    c
   void (*some_address)(void); // Function pointer
   some_address = (void*)0x20010001; // Assign misaligned address (odd address)
   some_address(); // Call invalid address → BusFault/MemManage Fault
-  ```  
+      
   - Cortex-M requires function addresses to be **aligned** (LSB = 0). Using `0x20010001` (LSB = 1) triggers a fault.  
 
 ---
@@ -2215,15 +2215,15 @@ This code is designed to **trigger and handle hardware faults** (e.g., MemManage
 #### **3. Fault Handlers**  
 The second file defines handlers for specific faults:  
 - **MemManage Handler**:  
-  ```c
+    c
   printf("Exception : MemManage\n"); while(1);  
-  ```  
+      
 - **BusFault Handler**:  
-  ```c
+    c
   printf("Exception : BusFault\n"); while(1);  
-  ```  
+      
 - **UsageFault Handler**:  
-  ```c
+    c
   uint32_t *pUFSR = (uint32_t*)0xE000ED2A; // UFSR register address
   printf("Exception : UsageFault\n");
   printf("UFSR = %x\n", *pUFSR); // Read fault status
@@ -2235,9 +2235,9 @@ The second file defines handlers for specific faults:
 ---
 
 #### **4. Infinite Loop**  
-```c
+  c
 for(;;); // Hang after triggering faults
-```  
+    
 Prevents the program from proceeding after a fault, allowing inspection of registers via a debugger.
 
 ---
@@ -2266,7 +2266,7 @@ This program:
 **Critical Fixes Needed**: Correct syntax errors and typos for the code to compile/work.  
 
 **Output Example** (if faults are triggered):  
-```
+  
 Exception : BusFault  
 UFSR = 0x20010001 // Fault address logged
 
@@ -2298,7 +2298,7 @@ A Supervisor Call (SVC) exception is used in ARM Cortex processors to enable use
 #### Example Code
 Here is an example of how SVC might be used in ARM assembly:
 
-```assembly
+  assembly
 _start:
     MOV     R0, #1             @ STDOUT
     ADR     R1, msgtext        @ Address
@@ -2308,7 +2308,7 @@ _start:
 .align 2
 msgtext:
     .asciz "Hello World\n"
-```
+  
 In this example:
 - `R0` specifies the file descriptor (STDOUT).
 - `R1` points to the message text.
@@ -2354,7 +2354,7 @@ The PendSV (Pendable Service Call) exception is a special interrupt in ARM Corte
 2. **PendSV Handler**:
    - The PendSV handler is responsible for saving the current task's context, switching to the next task, and restoring its context.
    - Example Handler:
-     ```c
+       c
      void PendSV_Handler(void) {
          // Save context of the current task
          __asm volatile (
@@ -2375,7 +2375,7 @@ The PendSV (Pendable Service Call) exception is a special interrupt in ARM Corte
              "BX LR\n\t"
          );
      }
-     ```
+       
 
 3. **Context Switching**:
    - **Saving Context**: The current task's CPU registers are saved onto its stack.
@@ -2386,14 +2386,14 @@ The PendSV (Pendable Service Call) exception is a special interrupt in ARM Corte
 Here’s a practical example of how PendSV is used in an RTOS for context switching:
 
 1. **Trigger PendSV**:
-   ```c
+     c
    void triggerPendSV(void) {
        SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
    }
-   ```
+     
 
 2. **PendSV Handler**:
-   ```c
+     c
    void PendSV_Handler(void) {
        // Save the context of the current task
        __asm volatile (
@@ -2414,16 +2414,16 @@ Here’s a practical example of how PendSV is used in an RTOS for context switch
            "BX LR\n\t"
        );
    }
-   ```
+     
 
 3. **Scheduler**:
-   ```c
+     c
    Task* pickNextTask(void) {
        // Simple round-robin scheduler
        Task* next = currentTask->next;
        return next;
    }
-   ```
+     
 
 #### Debugging PendSV Exceptions
 1. **Setting Breakpoints**: Use a debugger to set breakpoints in the PendSV handler to inspect the state of the processor and the context being switched.
@@ -2492,7 +2492,7 @@ Explain the implications of running in Unprivileged Thread Mode versus Privilege
 
 #### Example Code for Switching Modes
 
-```c
+  c
 void switchToUnprivilegedMode(void) {
     __set_CONTROL(__get_CONTROL() | 0x01);  // Set CONTROL[0] to 1 (unprivileged)
 }
@@ -2500,7 +2500,7 @@ void switchToUnprivilegedMode(void) {
 void switchToPrivilegedMode(void) {
     __set_CONTROL(__get_CONTROL() & ~0x01);  // Set CONTROL[0] to 0 (privileged)
 }
-```
+  
 
 ### Summary
 
@@ -2799,7 +2799,7 @@ Consider a system with three interrupts: A, B, and C, with priority levels 1, 2,
 
 Here’s an example of how NVIC prioritization and tail-chaining might be implemented in code:
 
-```c
+  c
 void Interrupt_Handler_A(void) {
     // Handle interrupt A
     // Clear interrupt flag for A
@@ -2829,7 +2829,7 @@ void setup_interrupts(void) {
     NVIC_EnableIRQ(Interrupt_B_IRQn);
     NVIC_EnableIRQ(Interrupt_C_IRQn);
 }
-```
+  
 
 ### Summary
 
@@ -2955,15 +2955,15 @@ Consider a UART (Universal Asynchronous Receiver/Transmitter) peripheral that ge
 
 #### Peripheral Level
 - **Example**: Clearing the UART interrupt flag.
-  ```c
+    c
   UART_ClearInterruptFlag(UARTx);
-  ```
+    
 
 #### NVIC Level
 - **Example**: Clearing the pending interrupt flag in the NVIC.
-  ```c
+    c
   NVIC_ClearPendingIRQ(UARTx_IRQn);
-  ```
+    
 
 ### Best Practices
 
@@ -3025,7 +3025,7 @@ The EXC_RETURN value is a special constant that provides the processor with the 
 #### Example of EXC_RETURN Usage
 Here is an example of how the EXC_RETURN value is used in an exception handler:
 
-```assembly
+  assembly
 Exception_Handler:
     TST     LR, #4              ; Test EXC_RETURN[2] to determine stack pointer
     ITE     EQ                  ; If-Then-Else instruction
@@ -3049,7 +3049,7 @@ Exception_Handler:
 
     ; Return from exception
     BX      LR
-```
+  
 
 In this example:
 - The `TST` instruction checks Bit [2] of the EXC_RETURN value to determine which stack pointer was used.
@@ -3075,39 +3075,39 @@ In ARM Cortex-M processors, PRIMASK, FAULTMASK, and BASEPRI are special register
 - **Usage**: It is typically used in critical sections of code where you need to ensure that no interrupts can occur, except for the highest priority ones (NMI and HardFault).
 - **How to Use**:
   - **Disable Interrupts**: Set PRIMASK to 1.
-    ```c
+      c
     __disable_irq(); // Equivalent to setting PRIMASK to 1
-    ```
+      
   - **Enable Interrupts**: Clear PRIMASK to 0.
-    ```c
+      c
     __enable_irq(); // Equivalent to clearing PRIMASK to 0
-    ```
+      
 
 #### FAULTMASK
 - **Purpose**: FAULTMASK is used to disable all exceptions, including HardFault, but not NMI.
 - **Usage**: It is used in scenarios where you need to handle critical fault conditions and ensure that no other exceptions can interfere, except for NMI.
 - **How to Use**:
   - **Disable Faults**: Set FAULTMASK to 1.
-    ```c
+      c
     __set_FAULTMASK(1);
-    ```
+      
   - **Enable Faults**: Clear FAULTMASK to 0.
-    ```c
+      c
     __set_FAULTMASK(0);
-    ```
+      
 
 #### BASEPRI
 - **Purpose**: BASEPRI is used to set a priority threshold for exception handling. It disables all interrupts with a priority level equal to or lower than the value set in BASEPRI.
 - **Usage**: It is useful for managing interrupt priorities and ensuring that only higher-priority interrupts can preempt the current execution.
 - **How to Use**:
   - **Set Priority Threshold**: Set BASEPRI to a specific priority level.
-    ```c
+      c
     __set_BASEPRI(priority_level);
-    ```
+      
   - **Clear Priority Threshold**: Clear BASEPRI to 0 to allow all interrupts.
-    ```c
+      c
     __set_BASEPRI(0);
-    ```
+      
 
 ### When to Use Each
 
@@ -3157,7 +3157,7 @@ void manage_priority(void) {
     // Clear priority threshold
     __set_BASEPRI(0);
 }
-```
+  
 
 Would you like more detailed information on any specific aspect of these registers or their usage?
 
@@ -3216,35 +3216,35 @@ Debugging heap and stack collisions involves several steps:
 Here's a simplified example of how you might use GDB to debug a stack overflow:
 
 1. **Compile with Debug Information**:
-   ```sh
+     sh
    gcc -g -o my_program my_program.c
-   ```
+     
 
 2. **Run the Program in GDB**:
-   ```sh
+     sh
    gdb ./my_program
-   ```
+     
 
 3. **Set a Breakpoint at the Start of the Main Function**:
-   ```gdb
+     gdb
    (gdb) break main
-   ```
+     
 
 4. **Run the Program**:
-   ```gdb
+     gdb
    (gdb) run
-   ```
+     
 
 5. **Inspect the Stack and Heap**:
-   ```gdb
+     gdb
    (gdb) info proc mappings
-   ```
+     
 
 6. **Monitor Memory Usage**:
-   ```gdb
+     gdb
    (gdb) watch *heap_pointer
    (gdb) watch *stack_pointer
-   ```
+     
 
 By following these steps, you can identify and resolve issues related to heap and stack collisions in SRAM.
 
@@ -3340,7 +3340,7 @@ The CFSR is a composite register that includes the following sub-registers:
 
 ### Example Diagnostic Code
 
-```c
+  c
 void diagnoseHardFault(void) {
     uint32_t hfsr = SCB->HFSR;
     uint32_t cfsr = SCB->CFSR;
@@ -3384,7 +3384,7 @@ void diagnoseHardFault(void) {
         if (ufsr & (1 << 9)) printf("Division by zero.\n");
     }
 }
-```
+  
 
 ### Summary
 
@@ -3408,14 +3408,14 @@ Explain the difference between a UsageFault, BusFault, and MemManage Fault. Prov
 - Examples include division by zero, unaligned memory access, and invalid state transitions.
 
 **Example Code**:
-```c
+  c
 void triggerUsageFault(void) {
     // Division by zero
     int a = 10;
     int b = 0;
     int c = a / b;  // This will trigger a UsageFault
 }
-```
+  
 
 #### 2. BusFault
 
@@ -3424,13 +3424,13 @@ void triggerUsageFault(void) {
 - Examples include accessing a non-existent memory location or a peripheral that is not ready.
 
 **Example Code**:
-```c
+  c
 void triggerBusFault(void) {
     // Accessing an invalid memory location
     volatile int *ptr = (int *)0xFFFFFFF0;  // Invalid address
     int value = *ptr;  // This will trigger a BusFault
 }
-```
+  
 
 #### 3. MemManage Fault
 
@@ -3439,13 +3439,13 @@ void triggerBusFault(void) {
 - Examples include accessing memory regions that are protected by the MPU (Memory Protection Unit).
 
 **Example Code**:
-```c
+  c
 void triggerMemManageFault(void) {
     // Assuming MPU is configured to protect the region 0x20000000 - 0x20001000
     volatile int *protectedMemory = (int *)0x20000000;
     int value = *protectedMemory;  // This will trigger a MemManage Fault
 }
-```
+  
 
 ### Detailed Explanation
 
@@ -3559,18 +3559,18 @@ Let's consider an example where we have two interrupts: Interrupt A (lower prior
 ### Example Code Snippets
 
 **SysTick Handler (Higher Priority):**
-```c
+  c
 void SysTick_Handler(void) {
     // SysTick ISR code
 }
-```
+  
 
 **GPIO Interrupt Handler (Lower Priority):**
-```c
+  c
 void GPIO_IRQHandler(void) {
     // GPIO ISR code
 }
-```
+  
 
 ### Summary
 
@@ -3601,13 +3601,13 @@ Manually triggering an interrupt in software can be done using the **Software Tr
 The STIR register allows you to trigger an interrupt by writing the interrupt number to it. This is a straightforward method.
 
 **Example:**
-```c
+  c
 #define NVIC_STIR (*((volatile uint32_t *)0xE000EF00))  // Base address of STIR register
 
 void trigger_interrupt(uint8_t interrupt_number) {
     NVIC_STIR = interrupt_number;  // Write the interrupt number to STIR
 }
-```
+  
 
 #### Using NVIC_ISPR
 
@@ -3624,7 +3624,7 @@ void set_interrupt_pending(uint8_t interrupt_number) {
     
     *nvic_ispr = (1 << bit_position);  // Set the pending bit for the interrupt
 }
-```
+  
 
 ### Precautions to Avoid Race Conditions
 
@@ -3636,21 +3636,21 @@ Race conditions can occur when multiple threads or interrupts access shared reso
    __disable_irq();  // Disable interrupts
    // Code to trigger interrupt or manipulate shared resource
    __enable_irq();   // Enable interrupts
-   ```
+     
 
 2. **Use Critical Sections:**
    - Protect critical sections of code where shared resources are accessed using mutexes or other synchronization mechanisms.
-   ```c
+     c
    void trigger_interrupt_safe(uint8_t interrupt_number) {
        __disable_irq();  // Disable interrupts
        NVIC_STIR = interrupt_number;  // Trigger interrupt
        __enable_irq();   // Enable interrupts
    }
-   ```
+     
 
 3. **Atomic Operations:**
    - Use atomic operations to manipulate shared resources. Atomic operations ensure that the resource is accessed and modified in a single, indivisible step.
-   ```c
+     c
    void set_interrupt_pending_safe(uint8_t interrupt_number) {
        __disable_irq();  // Disable interrupts
        uint8_t register_index = interrupt_number / 32;
@@ -3660,7 +3660,7 @@ Race conditions can occur when multiple threads or interrupts access shared reso
        *nvic_ispr = (1 << bit_position);  // Set the pending bit for the interrupt
        __enable_irq();   // Enable interrupts
    }
-   ```
+     
 
 4. **Priority Management:**
    - Ensure that the priority levels of interrupts are managed properly to avoid priority inversion and ensure that higher-priority interrupts can preempt lower-priority ones.
@@ -3669,7 +3669,7 @@ Race conditions can occur when multiple threads or interrupts access shared reso
 
 Here’s a complete example that includes disabling interrupts to avoid race conditions:
 
-```c
+  c
 #define NVIC_STIR (*((volatile uint32_t *)0xE000EF00))  // Base address of STIR register
 
 void trigger_interrupt_safe(uint8_t interrupt_number) {
@@ -3689,7 +3689,7 @@ void set_interrupt_pending_safe(uint8_t interrupt_number) {
     *nvic_ispr = (1 << bit_position);  // Set the pending bit for the interrupt
     __enable_irq();   // Enable interrupts
 }
-```
+  
 
 ### Summary
 
@@ -3733,7 +3733,7 @@ If the T bit is accidentally cleared, the processor will enter a HardFault state
 
 Here is an example of a HardFault handler that corrects the T bit:
 
-```c
+  c
 void HardFault_Handler(void) {
     __asm volatile (
         "TST lr, #4 \n"                // Test EXC_RETURN bit 2
@@ -3746,7 +3746,7 @@ void HardFault_Handler(void) {
         "BX lr \n"                     // Return from the exception
     );
 }
-```
+  
 
 ### Explanation of the HardFault Handler
 
@@ -3815,7 +3815,7 @@ Let's assume you want to set the priority for interrupt number 5.
 
 Here is an example of how you might set the priority for interrupt number 5 to 3:
 
-```c
+  c
 #define NVIC_IPR_BASE 0xE000E400  // Base address of NVIC_IPR registers
 #define NVIC_IPR1     (*(volatile uint32_t *)(NVIC_IPR_BASE + 0x04))  // NVIC_IPR1 register
 
@@ -3832,7 +3832,7 @@ int main() {
     set_interrupt_priority(5, 3);  // Set priority of interrupt number 5 to 3
     return 0;
 }
-```
+  
 
 ### Writable Bits
 
@@ -3844,7 +3844,7 @@ int main() {
 
 If only the upper 4 bits are writable, the priority value must be shifted accordingly:
 
-```c
+  c
 void set_interrupt_priority(uint8_t interrupt_number, uint8_t priority) {
     uint8_t register_index = interrupt_number / 4;
     uint8_t bit_shift = (interrupt_number % 4) * 8 + 4;  // Shift by 4 to access writable bits
@@ -3858,7 +3858,7 @@ int main() {
     set_interrupt_priority(5, 3);  // Set priority of interrupt number 5 to 3
     return 0;
 }
-```
+  
 
 ### Summary
 
@@ -3903,15 +3903,15 @@ Writing to the **Software Trigger Interrupt Register (STIR)** and setting a pend
 
 **Usage:**
 - To set an interrupt as pending, write a 1 to the corresponding bit in the NVIC_ISPR register.
-  ```c
+    c
   NVIC->ISPR[interrupt_number / 32] = (1 << (interrupt_number % 32));
-  ```
+    
 
 **Example:**
 - If you want to set interrupt number 5 as pending:
-  ```c
+    c
   NVIC->ISPR[0] = (1 << 5);  // Assuming interrupt number 5 is within the first 32 interrupts
-  ```
+    
 
 ### Differences
 
@@ -3992,7 +3992,7 @@ Designing an RTOS (Real-Time Operating System) scheduler using PendSV and SysTic
          // Restore next task context
          restore_context(current_task);
      }
-     ```
+       
 
 ### Detailed Steps in Context Switching
 
@@ -4015,7 +4015,7 @@ Designing an RTOS (Real-Time Operating System) scheduler using PendSV and SysTic
 void SysTick_Init(void) {
     SysTick_Config(SystemCoreClock / 1000);  // Configure SysTick to interrupt every 1 ms
 }
-```
+  
 
 **SysTick Handler:**
 
@@ -4025,7 +4025,7 @@ void SysTick_Handler(void) {
         SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;  // Set PendSV interrupt
     }
 }
-```
+  
 
 **PendSV Handler:**
 
@@ -4065,10 +4065,10 @@ In Cortex-M microcontrollers, PRIMASK and BASEPRI are used to manage interrupt p
 1. **Disable Interrupts:**
  
    __disable_irq();  // Set PRIMASK to 1
-   ```
+     
 2. **Perform Atomic Operation:**
    // Critical section code here
-   ```
+     
 3. **Enable Interrupts:**
    __enable_irq();  // Set PRIMASK to 0
  
@@ -4086,17 +4086,17 @@ In Cortex-M microcontrollers, PRIMASK and BASEPRI are used to manage interrupt p
 
 **Creating Atomic Operations:**
 1. **Set BASEPRI:**
-   ```c
+     c
    __set_BASEPRI(max_priority);  // Set BASEPRI to the maximum priority level you want to block
-   ```
+     
 2. **Perform Atomic Operation:**
-   ```c
+     c
    // Critical section code here
-   ```
+     
 3. **Clear BASEPRI:**
-   ```c
+     c
    __set_BASEPRI(0);  // Clear BASEPRI to allow all interrupts
-   ```
+     
 
 **Trade-offs:**
 - **Granularity:** BASEPRI allows more fine-grained control over which interrupts are disabled, enabling higher-priority interrupts to still be serviced.
@@ -4176,7 +4176,7 @@ void criticalSectionExample(void) {
     // Re-enable interrupts
     __enable_irq();
 }
-```
+  
 
 ### Example Code for Selective Interrupt Masking
 
@@ -4261,7 +4261,7 @@ The Memory Protection Unit (MPU) in ARM Cortex-M processors can be used to enfor
 
 #### Example Configuration
 
-```assembly
+  assembly
 ; Enable MPU
 LDR R0, =0xE000ED94  ; MPU_CTRL register address
 MOV R1, #1           ; Enable MPU
@@ -4279,7 +4279,7 @@ STR R1, [R0]
 LDR R0, =0xE000EDA0  ; MPU_RASR register address
 MOV R1, #0x03070023  ; Size, access permissions, and attributes
 STR R1, [R0]
-```
+  
 
 ### Summary
 
@@ -4397,7 +4397,7 @@ A spurious interrupt occurs when an interrupt request (IRQ) is triggered, but no
 
 #### Example Default ISR in Assembly
 
-```assembly
+  assembly
 Default_Handler:
     B Default_Handler  ; Infinite loop
 
@@ -4410,7 +4410,7 @@ void Default_Handler(void) {
         // Optionally log the error or trigger a system reset
     }
 }
-```
+  
 
 ### Summary
 
@@ -4471,7 +4471,7 @@ To program these registers and implement task scheduling, you can follow these s
 
 Here is an example of how you might implement this in C:
 
-```c
+  c
 #include <stdint.h>
 
 #define SYST_CSR   (*((volatile uint32_t *)0xE000E010))
@@ -4499,7 +4499,7 @@ int main(void) {
         // Main loop
     }
 }
-```
+  
 
 This code initializes the SysTick timer with a reload value and enables the SysTick interrupt. The `SysTick_Handler` function is where you would implement your task scheduling logic.
 
@@ -4666,9 +4666,10 @@ void os_scheduler(void) {
     // Restore the context of the new task
     restore_context(current_task);
 }
-```
+  
 
 ### 10. **Conclusion**
 The scheduler in ARM Cortex-M3/M4 microcontrollers is a sophisticated component that ensures efficient task management and real-time performance. Understanding its operation is crucial for developing reliable and responsive embedded systems.
+
 
 If you have any specific questions or need further details on any part of the scheduler, feel free to ask!
